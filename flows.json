@@ -1,17 +1,9 @@
 [
     {
-        "id": "bd3af17f6da91d49",
-        "type": "tab",
-        "label": "Flow 1",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
         "id": "190ed3e96d0709a5",
         "type": "tab",
         "label": "ADC2",
-        "disabled": true,
+        "disabled": false,
         "info": "",
         "env": []
     },
@@ -1535,7 +1527,7 @@
         "id": "a9f7ca731edbcb8b",
         "type": "inject",
         "z": "4f1c58c90aef2801",
-        "name": "ADC_3_AI1",
+        "name": "ADC3_AI1",
         "props": [
             {
                 "p": "payload"
@@ -1552,7 +1544,7 @@
         "topic": "read_ADC3_AI1",
         "payload": "{\"value\":0,\"fc\":3,\"unitid\":1,\"address\":41,\"quantity\":1}",
         "payloadType": "json",
-        "x": 220,
+        "x": 210,
         "y": 460,
         "wires": [
             []
@@ -1783,8 +1775,7 @@
                 "557237e248b7dc62",
                 "ac3a9923480b6a67",
                 "5525db57403cc012",
-                "391fb7592ef9f2b2",
-                "106f475792ced7cd"
+                "391fb7592ef9f2b2"
             ],
             []
         ]
@@ -1882,8 +1873,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1460,
-        "y": 420,
+        "x": 1480,
+        "y": 400,
         "wires": [
             [
                 "f5299b1650911717"
@@ -1924,7 +1915,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 1470,
-        "y": 500,
+        "y": 480,
         "wires": []
     },
     {
@@ -2212,7 +2203,7 @@
         "finalize": "",
         "libs": [],
         "x": 1470,
-        "y": 460,
+        "y": 440,
         "wires": [
             [
                 "0e9bc527bc20300f"
@@ -2243,7 +2234,6 @@
         "id": "d55dae7b3a90f13d",
         "type": "mqtt out",
         "z": "4f1c58c90aef2801",
-        "d": true,
         "name": "mqtt_tb_MN-4",
         "topic": "v1/devices/me/telemetry",
         "qos": "",
@@ -2262,7 +2252,6 @@
         "id": "f5299b1650911717",
         "type": "mqtt out",
         "z": "4f1c58c90aef2801",
-        "d": true,
         "name": "mqtt_tb_MN-6A",
         "topic": "v1/devices/me/telemetry",
         "qos": "",
@@ -2281,7 +2270,6 @@
         "id": "7047b915d06ac299",
         "type": "mqtt out",
         "z": "4f1c58c90aef2801",
-        "d": true,
         "name": "mqtt_tb_MN-6B",
         "topic": "v1/devices/me/telemetry",
         "qos": "",
@@ -2445,223 +2433,6 @@
         "payloadType": "date",
         "x": 220,
         "y": 380,
-        "wires": [
-            [
-                "e0f9ab2ec51ce602"
-            ]
-        ]
-    },
-    {
-        "id": "106f475792ced7cd",
-        "type": "function",
-        "z": "4f1c58c90aef2801",
-        "name": "Data Accumulation Node",
-        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload // Usar directamente msg.payload\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };\n",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1410,
-        "y": 160,
-        "wires": [
-            [
-                "08aeac591c9d0cf8"
-            ]
-        ]
-    },
-    {
-        "id": "08aeac591c9d0cf8",
-        "type": "function",
-        "z": "4f1c58c90aef2801",
-        "name": "Flow Calculation Node",
-        "func": "const cola = msg.payload;\nlet flujo = 0;\n\nif (cola.length > 1) {\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (65000 - 3200);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (65000 - 3200);\n\n    if (tiempoDiferencia > 0) {\n        flujo = Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600); // calcular flujo\n    }\n} else {\n    // Manejar el caso cuando no hay suficientes registros para calcular un flujo\n    flujo = \"Insuficientes datos para cálculo de flujo\";\n}\n\n// Devolver el valor del flujo\nreturn { payload: flujo };\n",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1640,
-        "y": 160,
-        "wires": [
-            [
-                "bdc7f7732b4c1af6",
-                "a06533d144222bb0",
-                "4832f9db5f652ac6",
-                "e52f2511acfd4d08"
-            ]
-        ]
-    },
-    {
-        "id": "bdc7f7732b4c1af6",
-        "type": "debug",
-        "z": "4f1c58c90aef2801",
-        "name": "Flujo HCD",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1910,
-        "y": 120,
-        "wires": []
-    },
-    {
-        "id": "a06533d144222bb0",
-        "type": "function",
-        "z": "4f1c58c90aef2801",
-        "name": "telemetria",
-        "func": "msg.payload = {\n  flujo: msg.payload\n};\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1920,
-        "y": 200,
-        "wires": [
-            [
-                "399968e96d48e6c0"
-            ]
-        ]
-    },
-    {
-        "id": "4832f9db5f652ac6",
-        "type": "ui-gauge",
-        "z": "4f1c58c90aef2801",
-        "name": "Flujo HCD",
-        "group": "3f690bb5a526a246",
-        "order": 2,
-        "width": "5",
-        "height": "4",
-        "gtype": "gauge-half",
-        "gstyle": "rounded",
-        "title": "Flujo HCD",
-        "units": "L/h",
-        "icon": "",
-        "prefix": "",
-        "suffix": "",
-        "segments": [
-            {
-                "from": "0",
-                "color": "#ea5353"
-            },
-            {
-                "from": "4000",
-                "color": "#5cd65c"
-            },
-            {
-                "from": "7500",
-                "color": "#ea5353"
-            }
-        ],
-        "min": 0,
-        "max": "10000",
-        "sizeThickness": "26",
-        "sizeGap": "3",
-        "sizeKeyThickness": "20",
-        "styleRounded": true,
-        "styleGlow": false,
-        "className": "",
-        "x": 1910,
-        "y": 160,
-        "wires": []
-    },
-    {
-        "id": "e52f2511acfd4d08",
-        "type": "function",
-        "z": "4f1c58c90aef2801",
-        "name": "F_influx_flujo",
-        "func": "if (isNaN(msg.payload)) {\n    node.error(\"Valor de flujo no es un número\", msg);\n    return null;\n}\nmsg.payload = {\n    bucket: 'sensores',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'MF-1.1',\n                equipo_id: 'FA-02A',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                flujo_lh: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1910,
-        "y": 80,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "399968e96d48e6c0",
-        "type": "mqtt out",
-        "z": "4f1c58c90aef2801",
-        "d": true,
-        "name": "mqtt_tb_MF-1.1",
-        "topic": "v1/devices/me/telemetry",
-        "qos": "",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "7010d93871a46530",
-        "x": 2080,
-        "y": 200,
-        "wires": []
-    },
-    {
-        "id": "6b2bdb9628512b61",
-        "type": "inject",
-        "z": "4f1c58c90aef2801",
-        "name": "ADC3_AI0",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "2",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "1",
-        "topic": "read_ADC3_AI0",
-        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":1,\"quantity\":1}",
-        "payloadType": "json",
-        "x": 390,
-        "y": 200,
-        "wires": [
-            [
-                "e0f9ab2ec51ce602"
-            ]
-        ]
-    },
-    {
-        "id": "fdb5fe1bfa0ae0f6",
-        "type": "inject",
-        "z": "4f1c58c90aef2801",
-        "name": "ADC3_AI1",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "2",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "1",
-        "topic": "read_ADC3_AI1",
-        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":0,\"quantity\":1}",
-        "payloadType": "json",
-        "x": 490,
-        "y": 120,
         "wires": [
             [
                 "e0f9ab2ec51ce602"
