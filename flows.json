@@ -1421,7 +1421,9 @@
         "x": 220,
         "y": 420,
         "wires": [
-            []
+            [
+                "e0f9ab2ec51ce602"
+            ]
         ]
     },
     {
@@ -1471,7 +1473,8 @@
             ],
             [],
             [
-                "8050baee79313da6"
+                "8050baee79313da6",
+                "ca50c8da91087b3c"
             ]
         ],
         "info": "# Modbus Queue\r\n\r\nThis node queueing read and write messages for modbus. Use this node if you are reading and writing the same device with many different requests. E.g. reading different coil/register intervals continously and also writing to the device at the same time.\r\n\r\nIt does a few things:\r\n- queues all messages arrive on the input port\r\n- based on the msg.topic, older messages of the same topci is ignored\r\n- sends out the oldest message and waits for the \r\n- monitors the time since last message and send out report on the output\r\n- handles online/offline status\r\n- resend the last message is response is not received in time\r\n\r\n## Input Data\r\n\r\n### payload\r\n\r\nThe payload should contain the data that gets sent to the flex-getter or flex-write node.\r\nTypical modbus read payload:\r\n`{\"value\":0,\"fc\":3,\"unitid\":1,\"address\":1000,\"quantity\":20}`\r\nTypical modbus write payload:\r\n`{\"value\":false,\"fc\":5,\"unitid\":1,\"address\":0,\"quantity\":1}`\r\n\r\n### topic\r\n\r\nEach message must contain a topic (any text), and this topic is used to identify the different read/write requests and delete any earlier request with the same topic if it still in the queueing\r\n\r\nThere are a few reserved topic for special function (for these payload is ignored):\r\n- reset: resets the queue and deleted any data collected so far\r\n- next: this is the message fed back from the flex getter/write node to indicate to this node that a new message can be sent out\r\n- update: this should be coming from a 1 second time to display the current queue count, time since the last update and online/offline status\r\n\r\n## Output ports\r\n\r\n### Port 1: flex getter\r\n\r\nThis output should be connected to a modbos-flex-getter and all the read requests will be sent out through this port\r\n\r\n### Port 2: flex write\r\n\r\nThis output should be connected to a modbos-flex-write and all the write requests will be sent out through this port\r\n\r\n### Port 3: status messages\r\n\r\nThis port outputs a status message for every update message (msg.topic=\"update\").\r\n\r\n- topic: \"Information\" for regular updates, \"Warning\": offline device is now back online, \"Error\": device is offline\r\n- payload.text: message like when the device gone offline, or back online\r\n- payload.updatetext: time passed since the last update (human readable format)\r\n- payload.secondsincelastupdate: number of seconds since the last update from the device\r\n- payload.statuschange: true if status is changed (gone offline, back online)\r\n- payload.state: 0: initial state, no data yet, 1: device online, 99: device offline\r\n\r\n## Node Settings\r\n\r\nChange the settings in the first 4 lines of the code to influence the behaviour. Explanation is in the code as comment."
@@ -1491,7 +1494,9 @@
         "x": 650,
         "y": 600,
         "wires": [
-            []
+            [
+                "dafbc58d04cb9995"
+            ]
         ]
     },
     {
@@ -1547,7 +1552,9 @@
         "x": 210,
         "y": 460,
         "wires": [
-            []
+            [
+                "e0f9ab2ec51ce602"
+            ]
         ]
     },
     {
@@ -1574,7 +1581,9 @@
         "x": 220,
         "y": 500,
         "wires": [
-            []
+            [
+                "e0f9ab2ec51ce602"
+            ]
         ]
     },
     {
@@ -2346,8 +2355,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 670,
-        "y": 860,
+        "x": 680,
+        "y": 820,
         "wires": [
             []
         ]
@@ -2438,5 +2447,39 @@
                 "e0f9ab2ec51ce602"
             ]
         ]
+    },
+    {
+        "id": "ca50c8da91087b3c",
+        "type": "debug",
+        "z": "4f1c58c90aef2801",
+        "name": "Status Queue",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "dafbc58d04cb9995",
+        "type": "debug",
+        "z": "4f1c58c90aef2801",
+        "name": "update log",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 810,
+        "y": 600,
+        "wires": []
     }
 ]
