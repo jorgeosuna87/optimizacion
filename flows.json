@@ -18,10 +18,39 @@
     {
         "id": "0a1446a2506c6a05",
         "type": "tab",
-        "label": "Flujo optimizado",
+        "label": "calculo flujo optimizado",
         "disabled": false,
         "info": "",
         "env": []
+    },
+    {
+        "id": "0eebc14e6b9c0fb5",
+        "type": "tab",
+        "label": "Flujo Optimizado",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "1b6aa974e2ca303d",
+        "type": "subflow",
+        "name": "Calcular Volumen y Enviar",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 60,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "bc34e8077dafa34c"
+                    }
+                ]
+            }
+        ],
+        "out": [],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
     },
     {
         "id": "7ac8f4b3a29c864f",
@@ -348,6 +377,119 @@
         "willMsg": {},
         "userProps": "",
         "sessionExpiry": ""
+    },
+    {
+        "id": "bc34e8077dafa34c",
+        "type": "function",
+        "z": "1b6aa974e2ca303d",
+        "name": "Calcular Volumen",
+        "func": "const sensorConfig = {\n    'read_ADC2_AI1': { maxLitros: 19000, equipo_id: 'FA-09', sensor_id: 'MN-9', mqttBroker: 'bb61bb0c49cb82b4' },\n    'read_ADC2_AI2': { maxLitros: 115500, equipo_id: 'FA-01', sensor_id: 'MN-1', mqttBroker: '7ac8f4b3a29c864f' },\n    'read_ADC2_AI3': { maxLitros: 50000, equipo_id: 'FA-XX', sensor_id: 'MN-XX', mqttBroker: 'mqttBrokerID' },\n    'read_ADC2_AI4': { maxLitros: 30000, equipo_id: 'FA-YY', sensor_id: 'MN-YY', mqttBroker: 'mqttBrokerID' }\n};\n\nconst config = sensorConfig[msg.topic];\nconst valorCrudo = msg.payload;\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * config.maxLitros;\nmsg.payload = Math.round(valorLitros);\nmsg.equipo_id = config.equipo_id;\nmsg.sensor_id = config.sensor_id;\nmsg.mqttBroker = config.mqttBroker;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 220,
+        "y": 60,
+        "wires": [
+            [
+                "5f1828bf7e42131a",
+                "ab4c022dca8a290b",
+                "b493823a86913ab5"
+            ]
+        ]
+    },
+    {
+        "id": "5f1828bf7e42131a",
+        "type": "mqtt out",
+        "z": "1b6aa974e2ca303d",
+        "name": "Enviar a MQTT",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "",
+        "retain": "",
+        "broker": "",
+        "x": 480,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "ab4c022dca8a290b",
+        "type": "function",
+        "z": "1b6aa974e2ca303d",
+        "name": "Formatear para UI",
+        "func": "msg.payload = msg.payload;\nmsg.topic = `Nivel ${msg.equipo_id}`;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 80,
+        "wires": [
+            [
+                "36a9c45880b69202"
+            ]
+        ]
+    },
+    {
+        "id": "36a9c45880b69202",
+        "type": "ui_gauge",
+        "z": "1b6aa974e2ca303d",
+        "name": "Gauge de Volumen",
+        "group": "3f690bb5a526a246",
+        "order": 1,
+        "width": "6",
+        "height": "4",
+        "gtype": "gage",
+        "title": "{{msg.topic}}",
+        "label": "Litros",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100000",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 670,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "b493823a86913ab5",
+        "type": "function",
+        "z": "1b6aa974e2ca303d",
+        "name": "Enviar a InfluxDB",
+        "func": "msg.payload = {\n    bucket: 'sensores',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: msg.sensor_id,\n                equipo_id: msg.equipo_id,\n                ubicacion: 'destilados'\n            },\n            fields: {\n                nivel_litros: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 120,
+        "wires": [
+            [
+                "ec9823e16410f948"
+            ]
+        ]
+    },
+    {
+        "id": "ec9823e16410f948",
+        "type": "Stackhero-InfluxDB-v2-write",
+        "z": "1b6aa974e2ca303d",
+        "server": "a1b3d7fc83d5c6f6",
+        "name": "InfluxDB",
+        "x": 670,
+        "y": 120,
+        "wires": [
+            []
+        ]
     },
     {
         "id": "0c9c4c6ccd5f1680",
@@ -2694,6 +2836,160 @@
         "className": "",
         "x": 970,
         "y": 420,
+        "wires": []
+    },
+    {
+        "id": "2c9c96b466a66dbf",
+        "type": "change",
+        "z": "0eebc14e6b9c0fb5",
+        "name": "Avanzar cola",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "next",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 870,
+        "y": 640,
+        "wires": [
+            [
+                "60ce4aa7d2756d25"
+            ]
+        ]
+    },
+    {
+        "id": "60ce4aa7d2756d25",
+        "type": "function",
+        "z": "0eebc14e6b9c0fb5",
+        "name": "Cola Modbus",
+        "func": "// Parámetros de configuración\nconst resendIfNoResponse = true;\nconst resendInterval = 10; // segundos\nconst onlineThreshold = 10; // segundos\nconst offlineThreshold = 300; // segundos\n\n// Inicialización de variables de contexto\nlet lastUpdate = context.get('lastUpdate') || 0;\nlet state = context.get('state') || 0;\nlet queue = context.get('queue') || [];\nlet sent = context.get('sent') || false;\nlet lastMsg = context.get('lastMsg');\n\n// Obtener tiempo actual\nlet currentTime = new Date().getTime();\nlet sendMsg = false;\nlet notifMsg = null;\n\n// Asegurarse de que el mensaje entrante tenga un tópico\nif (!msg.topic) {\n    node.status({ fill: 'red', shape: 'dot', text: 'Tópico faltante' });\n    return;\n}\n\nswitch (msg.topic.toLowerCase()) {\n    case 'update':\n        // Manejo de actualizaciones de estado\n        if (lastUpdate) {\n            const timeDiff = Math.floor((currentTime - lastUpdate) / 1000);\n            notifMsg = {\n                topic: 'Información',\n                payload: {\n                    secondsSinceLastUpdate: timeDiff,\n                    updateText: ''\n                }\n            };\n\n            // Formatear texto de actualización\n            let seconds = timeDiff % 60;\n            let minutes = Math.floor(timeDiff / 60) % 60;\n            let hours = Math.floor(timeDiff / 3600) % 24;\n            let days = Math.floor(timeDiff / 86400);\n            if (days > 0) {\n                notifMsg.payload.updateText = `Última actualización hace ${days} días, ${hours} horas, ${minutes} minutos, ${seconds} segundos`;\n            } else if (hours > 0) {\n                notifMsg.payload.updateText = `Última actualización hace ${hours} horas, ${minutes} minutos, ${seconds} segundos`;\n            } else if (minutes > 0) {\n                notifMsg.payload.updateText = `Última actualización hace ${minutes} minutos, ${seconds} segundos`;\n            } else {\n                notifMsg.payload.updateText = `Última actualización hace ${seconds} segundos`;\n            }\n\n            // Reenviar último mensaje si no hay respuesta\n            if (resendIfNoResponse && timeDiff > 0 && timeDiff % resendInterval === 0) {\n                if (lastMsg && context.get('sent')) {\n                    notifMsg.payload.resend = true;\n                    if ([1, 2, 3, 4].includes(lastMsg.payload.fc)) {\n                        node.status({ fill: 'green', shape: 'dot', text: 'Lectura reenviada' });\n                        return [lastMsg, null, notifMsg];\n                    } else {\n                        node.status({ fill: 'green', shape: 'dot', text: 'Escritura reenviada' });\n                        return [null, lastMsg, notifMsg];\n                    }\n                }\n            }\n\n            // Verificar estado en línea/fuera de línea\n            if (state !== 1 && timeDiff < onlineThreshold) {\n                notifMsg.topic = 'Warning';\n                notifMsg.payload.text = 'Dispositivo en línea';\n                notifMsg.payload.statusChange = true;\n                state = 1;\n                context.set('state', state);\n            } else if (state === 1 && timeDiff > offlineThreshold) {\n                notifMsg.topic = 'Error';\n                notifMsg.payload.text = 'Dispositivo fuera de línea';\n                notifMsg.payload.statusChange = true;\n                state = 99;\n                context.set('state', state);\n            }\n            notifMsg.payload.state = state;\n            if (state === 1) {\n                node.status({ fill: 'blue', shape: 'ring', text: queue.length + ' | ' + notifMsg.payload.updateText });\n            } else {\n                node.status({ fill: 'red', shape: 'ring', text: queue.length + ' | ' + notifMsg.payload.updateText });\n            }\n            return [null, null, notifMsg];\n        } else {\n            node.status({ fill: 'grey', shape: 'ring', text: 'Sin datos' });\n        }\n        break;\n    case 'next':\n        // Preparar para enviar el siguiente mensaje\n        context.set('lastUpdate', currentTime);\n        context.set('sent', false);\n        sendMsg = true;\n        break;\n    case 'reset':\n        // Reiniciar la cola y variables de contexto\n        context.set('queue', []);\n        context.set('sent', false);\n        context.set('lastMsg', undefined);\n        break;\n    default:\n        // Agregar mensaje a la cola\n        queue = queue.filter(item => item.topic !== msg.topic);\n        queue.push(msg);\n        context.set('queue', queue);\n        if (!sent) {\n            sendMsg = true;\n        }\n        node.status({ fill: 'green', shape: 'dot', text: queue.length.toString() });\n}\n\n// Enviar el siguiente mensaje si corresponde\nif (sendMsg) {\n    if (queue.length > 0) {\n        const nextMsg = queue.shift();\n        context.set('queue', queue);\n        context.set('sent', true);\n        context.set('lastMsg', nextMsg);\n        if ([1, 2, 3, 4].includes(nextMsg.payload.fc)) {\n            node.status({ fill: 'green', shape: 'dot', text: 'Lectura enviada' });\n            return [nextMsg, null, null];\n        } else {\n            node.status({ fill: 'green', shape: 'dot', text: 'Escritura enviada' });\n            return [null, nextMsg, null];\n        }\n    }\n}\n\nreturn;",
+        "outputs": 3,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 820,
+        "wires": [
+            [
+                "846f104be6efb4ce"
+            ],
+            [],
+            [
+                "9de52222f2023abd"
+            ]
+        ]
+    },
+    {
+        "id": "846f104be6efb4ce",
+        "type": "modbus-flex-getter",
+        "z": "0eebc14e6b9c0fb5",
+        "name": "ADC2 Lectura Agrupada",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": false,
+        "logIOActivities": false,
+        "server": "661d09df777a5259",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 990,
+        "y": 820,
+        "wires": [
+            [
+                "a1e1aa03ad56b0d4",
+                "2c9c96b466a66dbf"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "a1e1aa03ad56b0d4",
+        "type": "function",
+        "z": "0eebc14e6b9c0fb5",
+        "name": "Procesar Datos Modbus",
+        "func": "// Procesar las lecturas y enviar a procesamiento\nconst valores = msg.payload.data;\nconst topics = ['read_ADC2_AI1', 'read_ADC2_AI2', 'read_ADC2_AI3', 'read_ADC2_AI4'];\n\nvalores.forEach((valor, index) => {\n    node.send({ topic: topics[index], payload: valor });\n});\nreturn;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1290,
+        "y": 820,
+        "wires": [
+            [
+                "3d1e032097bb8c5f"
+            ]
+        ]
+    },
+    {
+        "id": "3d1e032097bb8c5f",
+        "type": "subflow:1b6aa974e2ca303d",
+        "z": "0eebc14e6b9c0fb5",
+        "name": "",
+        "env": [],
+        "x": 1580,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "c96b42be80162ffe",
+        "type": "inject",
+        "z": "0eebc14e6b9c0fb5",
+        "name": "update",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.1",
+        "topic": "update",
+        "payload": "",
+        "payloadType": "date",
+        "x": 540,
+        "y": 820,
+        "wires": [
+            [
+                "60ce4aa7d2756d25"
+            ]
+        ]
+    },
+    {
+        "id": "9de52222f2023abd",
+        "type": "debug",
+        "z": "0eebc14e6b9c0fb5",
+        "name": "Status Queue",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 980,
+        "y": 1020,
         "wires": []
     }
 ]
