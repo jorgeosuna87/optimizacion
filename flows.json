@@ -16,6 +16,14 @@
         "env": []
     },
     {
+        "id": "0a1446a2506c6a05",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "7ac8f4b3a29c864f",
         "type": "mqtt-broker",
         "name": "MN-1",
@@ -2480,6 +2488,212 @@
         "statusType": "auto",
         "x": 810,
         "y": 600,
+        "wires": []
+    },
+    {
+        "id": "7346e461e4b1c18f",
+        "type": "function",
+        "z": "0a1446a2506c6a05",
+        "name": "calc_vol",
+        "func": "const valorCrudo = msg.payload[0];\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Mantener solo el valor numérico\nreturn msg;\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 300,
+        "wires": [
+            [
+                "66ff9460a01c6324"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "66ff9460a01c6324",
+        "type": "function",
+        "z": "0a1446a2506c6a05",
+        "name": "Data Accumulation Node",
+        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload[0] // Asumiendo que el volumen viene en msg.payload como primer elemento del array\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 280,
+        "wires": [
+            [
+                "5a92dc2c750f0ec5"
+            ]
+        ]
+    },
+    {
+        "id": "5a92dc2c750f0ec5",
+        "type": "function",
+        "z": "0a1446a2506c6a05",
+        "name": "Flow Calculation Node",
+        "func": "// Contexto del flujo para mantener el estado\nconst RELLENANDO_KEY = \"rellenando\";\nconst FLUJOS_RECIENTES_KEY = \"flujosRecientes\";\n\nfunction calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0) {\n        return Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600);\n    }\n    return 0;\n}\n\nfunction estaRellenando(cola) {\n    if (cola.length < 2) return false;\n    const cambioVolumen = cola[cola.length - 1].volumen - cola[0].volumen;\n    return cambioVolumen > 150; // Considera rellenando si el volumen aumenta más de 50 unidades\n}\n\nfunction obtenerPromedioFlujo(flujosRecientes) {\n    if (flujosRecientes.length === 0) return 0;\n    const suma = flujosRecientes.reduce((a, b) => a + b, 0);\n    return Math.round(suma / flujosRecientes.length);\n}\n\n// Función principal\nconst cola = msg.payload;\nlet flujo = 0;\nlet rellenando = flow.get(RELLENANDO_KEY) || false;\nlet flujosRecientes = flow.get(FLUJOS_RECIENTES_KEY) || [];\n\nif (estaRellenando(cola)) {\n    if (!rellenando) {\n        // Acaba de comenzar el rellenado\n        rellenando = true;\n        flow.set(RELLENANDO_KEY, true);\n        node.status({fill:\"yellow\", shape:\"ring\", text:\"Rellenando - Usando flujo promedio\"});\n    }\n    flujo = obtenerPromedioFlujo(flujosRecientes);\n} else {\n    if (rellenando) {\n        // El rellenado acaba de terminar\n        rellenando = false;\n        flow.set(RELLENANDO_KEY, false);\n        node.status({fill:\"green\", shape:\"dot\", text:\"Operación normal\"});\n    }\n    flujo = calcularFlujo(cola);\n    \n    // Actualizar flujos recientes solo si es una medición válida\n    if (flujo > 0 && flujo <= 10000) { // Asumiendo que el flujo máximo es 10000 L/h\n        flujosRecientes.push(flujo);\n        // Mantener solo las últimas 10 mediciones válidas\n        if (flujosRecientes.length > 10) flujosRecientes.shift();\n        flow.set(FLUJOS_RECIENTES_KEY, flujosRecientes);\n    }\n}\n\nreturn { payload: flujo };",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 220,
+        "wires": [
+            [
+                "dd8dae85c35d04e4"
+            ]
+        ]
+    },
+    {
+        "id": "dd8dae85c35d04e4",
+        "type": "ui-gauge",
+        "z": "0a1446a2506c6a05",
+        "name": "Flujo COPE",
+        "group": "3f690bb5a526a246",
+        "order": 4,
+        "width": "5",
+        "height": "4",
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Flujo COPE",
+        "units": "L/h",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ea5353"
+            },
+            {
+                "from": "4000",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "7500",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "10000",
+        "sizeThickness": "26",
+        "sizeGap": "3",
+        "sizeKeyThickness": "20",
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 940,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "a04c9a1bff1e8e9c",
+        "type": "function",
+        "z": "0a1446a2506c6a05",
+        "name": "calc_vol",
+        "func": "const valorCrudo = msg.payload[0];\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Mantener solo el valor numérico\nreturn msg;\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 520,
+        "wires": [
+            [
+                "e459b3f5a855d75d"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "e459b3f5a855d75d",
+        "type": "function",
+        "z": "0a1446a2506c6a05",
+        "name": "Data Accumulation Node",
+        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload[0] // Asumiendo que el volumen viene en msg.payload como primer elemento del array\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 480,
+        "wires": [
+            [
+                "f64f9862a7fe2280"
+            ]
+        ]
+    },
+    {
+        "id": "f64f9862a7fe2280",
+        "type": "function",
+        "z": "0a1446a2506c6a05",
+        "name": "Flow Calculation Node",
+        "func": "// Contexto del flujo para mantener el estado\nconst RELLENANDO_KEY = \"rellenando\";\nconst FLUJOS_RECIENTES_KEY = \"flujosRecientes\";\n\nfunction calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0) {\n        return Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600);\n    }\n    return 0;\n}\n\nfunction estaRellenando(cola) {\n    if (cola.length < 2) return false;\n    const cambioVolumen = cola[cola.length - 1].volumen - cola[0].volumen;\n    return cambioVolumen > 150; // Considera rellenando si el volumen aumenta más de 50 unidades\n}\n\nfunction obtenerPromedioFlujo(flujosRecientes) {\n    if (flujosRecientes.length === 0) return 0;\n    const suma = flujosRecientes.reduce((a, b) => a + b, 0);\n    return Math.round(suma / flujosRecientes.length);\n}\n\n// Función principal\nconst cola = msg.payload;\nlet flujo = 0;\nlet rellenando = flow.get(RELLENANDO_KEY) || false;\nlet flujosRecientes = flow.get(FLUJOS_RECIENTES_KEY) || [];\n\nif (estaRellenando(cola)) {\n    if (!rellenando) {\n        // Acaba de comenzar el rellenado\n        rellenando = true;\n        flow.set(RELLENANDO_KEY, true);\n        node.status({fill:\"yellow\", shape:\"ring\", text:\"Rellenando - Usando flujo promedio\"});\n    }\n    flujo = obtenerPromedioFlujo(flujosRecientes);\n} else {\n    if (rellenando) {\n        // El rellenado acaba de terminar\n        rellenando = false;\n        flow.set(RELLENANDO_KEY, false);\n        node.status({fill:\"green\", shape:\"dot\", text:\"Operación normal\"});\n    }\n    flujo = calcularFlujo(cola);\n    \n    // Actualizar flujos recientes solo si es una medición válida\n    if (flujo > 0 && flujo <= 10000) { // Asumiendo que el flujo máximo es 10000 L/h\n        flujosRecientes.push(flujo);\n        // Mantener solo las últimas 10 mediciones válidas\n        if (flujosRecientes.length > 10) flujosRecientes.shift();\n        flow.set(FLUJOS_RECIENTES_KEY, flujosRecientes);\n    }\n}\n\nreturn { payload: flujo };",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 420,
+        "wires": [
+            [
+                "5be5b51bca193b4c"
+            ]
+        ]
+    },
+    {
+        "id": "5be5b51bca193b4c",
+        "type": "ui-gauge",
+        "z": "0a1446a2506c6a05",
+        "name": "Flujo Residuo",
+        "group": "3f690bb5a526a246",
+        "order": 4,
+        "width": "5",
+        "height": "4",
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Flujo Residuo",
+        "units": "L/h",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ea5353"
+            },
+            {
+                "from": "4000",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "7500",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "10000",
+        "sizeThickness": "26",
+        "sizeGap": "3",
+        "sizeKeyThickness": "20",
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 970,
+        "y": 420,
         "wires": []
     }
 ]
