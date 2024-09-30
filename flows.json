@@ -43,7 +43,7 @@
         "id": "7bdaf3fb66ecd941",
         "type": "tab",
         "label": "T. Principal RTU",
-        "disabled": false,
+        "disabled": true,
         "info": "",
         "env": []
     },
@@ -51,7 +51,7 @@
         "id": "79b057876d37bdc0",
         "type": "tab",
         "label": "ADC4",
-        "disabled": false,
+        "disabled": true,
         "info": "ADC para tempertura de intercambiadores\r\nSIO-MB08THMS\r\nTemperature Input Module: thermocouple, 8-channel in",
         "env": []
     },
@@ -59,7 +59,7 @@
         "id": "af01d920764bfaad",
         "type": "tab",
         "label": "flujo optimizado 1.1",
-        "disabled": false,
+        "disabled": true,
         "info": "",
         "env": []
     },
@@ -5180,8 +5180,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 700,
-        "y": 1020,
+        "x": 740,
+        "y": 960,
         "wires": [
             [
                 "011a5130f50f855b"
@@ -5192,8 +5192,9 @@
         "id": "e1a822778a0fd165",
         "type": "function",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "calc_vol",
-        "func": "const valorCrudo = msg.payload[0];\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Mantener solo el valor numérico\nreturn msg;\n",
+        "func": "const valorCrudo = msg.payload;\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Mantener solo el valor numérico\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -5204,7 +5205,6 @@
         "y": 720,
         "wires": [
             [
-                "f9ca6a75d35d7d10",
                 "840fc3448aa7be5e"
             ]
         ]
@@ -5213,6 +5213,7 @@
         "id": "c06d66220976b187",
         "type": "function",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "Data Accumulation Node",
         "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload[0] // Asumiendo que el volumen viene en msg.payload como primer elemento del array\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };\n",
         "outputs": 1,
@@ -5233,6 +5234,7 @@
         "id": "ceea6d417693d667",
         "type": "function",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "Flow Calculation Node",
         "func": "const RELLENANDO_KEY = \"rellenando\";\nconst FLUJOS_RECIENTES_KEY = \"flujosRecientes\";\nconst COLA_VACIADO_VALIDA_KEY = \"colaVaciadoValida\";\nconst ULTIMO_VOLUMEN_KEY = \"ultimoVolumen\";\n\nfunction calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0 && volumenInicial > volumenFinal) {\n        return Math.round(((volumenInicial - volumenFinal) / tiempoDiferencia) * 3600);\n    }\n    return 0;\n}\n\nfunction estaRellenando(ultimoVolumen, nuevoVolumen) {\n    return nuevoVolumen > ultimoVolumen + 150; // Considera rellenando si el volumen aumenta más de 150 unidades\n}\n\nfunction obtenerPromedioFlujo(flujosRecientes) {\n    if (flujosRecientes.length === 0) return 0;\n    const suma = flujosRecientes.reduce((a, b) => a + b, 0);\n    return Math.round(suma / flujosRecientes.length);\n}\n\n// Función principal\nconst ultimaLectura = msg.payload[msg.payload.length - 1];\nlet flujo = 0;\nlet rellenando = flow.get(RELLENANDO_KEY) || false;\nlet flujosRecientes = flow.get(FLUJOS_RECIENTES_KEY) || [];\nlet colaVaciadoValida = flow.get(COLA_VACIADO_VALIDA_KEY) || [];\nlet ultimoVolumen = flow.get(ULTIMO_VOLUMEN_KEY) || 0;\n\nif (estaRellenando(ultimoVolumen, ultimaLectura.volumen)) {\n    if (!rellenando) {\n        rellenando = true;\n        flow.set(RELLENANDO_KEY, true);\n        node.status({fill:\"yellow\", shape:\"ring\", text:\"Rellenando - Usando flujo promedio\"});\n    }\n    flujo = obtenerPromedioFlujo(flujosRecientes);\n    colaVaciadoValida = []; // Reiniciar la cola de vaciado válida\n} else {\n    if (rellenando) {\n        // El rellenado acaba de terminar\n        rellenando = false;\n        flow.set(RELLENANDO_KEY, false);\n        colaVaciadoValida = []; // Iniciar una nueva cola de vaciado válida\n        node.status({fill:\"green\", shape:\"dot\", text:\"Operación normal - Iniciando nuevo vaciado\"});\n    }\n    \n    // Añadir nuevo registro a la cola de vaciado válida\n    if (colaVaciadoValida.length === 0 || ultimaLectura.volumen < colaVaciadoValida[colaVaciadoValida.length - 1].volumen) {\n        colaVaciadoValida.push(ultimaLectura);\n    }\n    \n    // Mantener solo los últimos 5 minutos de datos válidos\n    const cincoMinutosAtras = Date.now() - 5 * 60 * 1000;\n    colaVaciadoValida = colaVaciadoValida.filter(registro => registro.tiempo >= cincoMinutosAtras);\n    \n    // Calcular el flujo usando solo los datos válidos\n    flujo = calcularFlujo(colaVaciadoValida);\n    \n    // Si no se puede calcular un flujo válido, usar el promedio de flujos recientes\n    if (flujo === 0 && flujosRecientes.length > 0) {\n        flujo = obtenerPromedioFlujo(flujosRecientes);\n    }\n    \n    // Actualizar flujos recientes solo si es una medición válida\n    if (flujo > 0 && flujo <= 10000) {\n        flujosRecientes.push(flujo);\n        if (flujosRecientes.length > 10) flujosRecientes.shift();\n        flow.set(FLUJOS_RECIENTES_KEY, flujosRecientes);\n    }\n}\n\n// Guardar el último volumen para la próxima ejecución\nflow.set(ULTIMO_VOLUMEN_KEY, ultimaLectura.volumen);\n\n// Guardar la cola de vaciado válida actualizada\nflow.set(COLA_VACIADO_VALIDA_KEY, colaVaciadoValida);\n\nreturn { payload: flujo };",
         "outputs": 1,
@@ -5241,7 +5243,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1880,
+        "x": 2000,
         "y": 420,
         "wires": [
             [
@@ -5255,6 +5257,7 @@
         "id": "8013d7446e6b7787",
         "type": "debug",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "Flujo COPE",
         "active": true,
         "tosidebar": true,
@@ -5332,8 +5335,7 @@
         "wires": [
             [],
             [
-                "e1a822778a0fd165",
-                "c06d66220976b187"
+                "73793c2aa437a1be"
             ],
             [],
             []
@@ -5343,6 +5345,7 @@
         "id": "739e2ec4f150a7c0",
         "type": "function",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "telemetria",
         "func": "msg.payload = {\n  flujo: msg.payload\n};\nreturn msg;",
         "outputs": 1,
@@ -5351,7 +5354,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2060,
+        "x": 2200,
         "y": 420,
         "wires": [
             [
@@ -5360,27 +5363,10 @@
         ]
     },
     {
-        "id": "f9ca6a75d35d7d10",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "telemetria",
-        "func": "msg.payload = {\n  volumen: msg.payload\n};\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1860,
-        "y": 720,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "9d7ad836ba0bf6ed",
         "type": "mqtt out",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "mqtt_flujocope",
         "topic": "v1/devices/me/telemetry",
         "qos": "",
@@ -5434,8 +5420,8 @@
         "styleRounded": true,
         "styleGlow": false,
         "className": "",
-        "x": 2210,
-        "y": 420,
+        "x": 2090,
+        "y": 300,
         "wires": []
     },
     {
@@ -5450,16 +5436,21 @@
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
+        "xAxisLabel": "",
         "xAxisProperty": "",
-        "xAxisPropertyType": "msg",
+        "xAxisPropertyType": "property",
         "xAxisType": "category",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "yAxisLabel": "",
         "yAxisProperty": "value",
         "ymin": "0",
         "ymax": "40000",
         "action": "replace",
+        "stackSeries": true,
         "pointShape": "circle",
         "pointRadius": 4,
-        "showLegend": false,
+        "showLegend": true,
         "removeOlder": 1,
         "removeOlderUnit": "3600",
         "removeOlderPoints": "",
@@ -5474,10 +5465,18 @@
             "#9467bd",
             "#c5b0d5"
         ],
-        "width": "1",
-        "height": "5",
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "2",
+        "height": "4",
         "className": "",
-        "x": 2160,
+        "x": 2200,
         "y": 720,
         "wires": [
             []
@@ -5487,6 +5486,7 @@
         "id": "840fc3448aa7be5e",
         "type": "function",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "formato_ui",
         "func": "msg.payload = {\n    value: msg.payload,\n    label: msg.payload + \" Litros\"\n};\nreturn msg;",
         "outputs": 1,
@@ -5664,9 +5664,7 @@
         "x": 710,
         "y": 720,
         "wires": [
-            [
-                "011a5130f50f855b"
-            ]
+            []
         ]
     },
     {
@@ -5778,551 +5776,135 @@
         ]
     },
     {
-        "id": "f640daeaeb10e0b6",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "update",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "update",
-        "payload": "",
-        "payloadType": "date",
-        "x": 640,
-        "y": 1540,
-        "wires": [
-            [
-                "ca69ac29a4bc8759"
-            ]
-        ]
-    },
-    {
-        "id": "e91321157df47c6a",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "next",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "next",
-        "payload": "",
-        "payloadType": "date",
-        "x": 650,
-        "y": 1500,
-        "wires": [
-            [
-                "ca69ac29a4bc8759"
-            ]
-        ]
-    },
-    {
-        "id": "424252db1ddad2e6",
-        "type": "change",
-        "z": "cf449ce1322fd8eb",
-        "name": "Advance queue",
-        "rules": [
-            {
-                "t": "set",
-                "p": "topic",
-                "pt": "msg",
-                "to": "next",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 870,
-        "y": 1620,
-        "wires": [
-            [
-                "ca69ac29a4bc8759"
-            ]
-        ]
-    },
-    {
-        "id": "ca69ac29a4bc8759",
+        "id": "e5c207b65b6d9a0a",
         "type": "function",
         "z": "cf449ce1322fd8eb",
-        "name": "Modbus Queue",
-        "func": "let resendifnoresposne = true; // resend the last message is no response is received\nlet resendinterval = 10; // resend last e message every x seconds\nlet online_threshold = 10; // Seconds between updates under which the device is considered online\nlet offline_threshold = 300; // Seconds between updates above which the device is considered offline\n\nlet notifmsg = null;\n\n// Check and make sure the incoming message has a topic\nif ((msg.topic===\"\")||(msg.topic===null)||(msg.topic===undefined)) {\n    node.status({fill:\"red\",shape:\"dot\",text:\"Topic missing\"});\n    return;\n}\n\nlet lastupdate = context.get(\"lastupdate\");\nlet state = context.get(\"state\") | 0;\nlet queue = context.get(\"queue\");\nlet queuecount = 0;\nif (queue === undefined) {\n    queue = [];\n} else {\n    if (Array.isArray(queue)) {\n        queuecount = queue.length;\n    } else {\n        queue = [];\n    }\n}\nlet current = new Date().getTime();\nlet send = false;\n\nswitch (msg.topic.toLowerCase()) {\n    case \"update\":\n        // Update the timer and statistics\n\n        if (lastupdate !== undefined) {\n            notifmsg = { \"topic\": \"Information\", \"payload\": {} };\n            current = current - lastupdate;\n            current = Math.floor(current / 1000);\n            notifmsg.payload.secondsincelastupdate = current;\n            var minute = Math.floor(current / 60);\n            var hour = Math.floor(minute / 60);\n            var day = Math.floor(hour / 24);\n            if (current > 24 * 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + day + \" days, \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60) {\n                notifmsg.payload.updatetext = \"Last update \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else {\n                notifmsg.payload.updatetext = \"Last update \" + current % 60 + \" seconds ago\";\n            }\n\n            // Resend last message if there is no response from the server\n            if (resendifnoresposne) {\n                if ((current>0) && (current % resendinterval===0)) {\n                    let lastmsg = context.get(\"lastmsg\");\n                    if ((lastmsg!==undefined) && (context.get(\"sent\"))) {\n                        notifmsg.payload.resend = true;\n                        if ((lastmsg.payload.fc === 1) || (lastmsg.payload.fc === 2) || (lastmsg.payload.fc === 3) || (lastmsg.payload.fc === 4)) {\n                            // this is a modbus read request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Read re-sent!\" });\n                            return [lastmsg, null, notifmsg];\n                        } else {\n                            // this is a modbus write request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Write re-sent!\" });\n                            return [null, lastmsg, notifmsg];\n                        }\n                    }\n                }\n            }\n\n            // Check for online state\n            if (state !== 1) {\n                if (current < online_threshold) {\n                    notifmsg.topic = \"Warning\";\n                    notifmsg.payload.text = \"Device is now online\";\n                    notifmsg.payload.statuschange = true;\n                    state = 1;\n                    context.set(\"state\", state);\n                }\n            } else {\n                if (current > offline_threshold) {\n                    notifmsg.topic = \"Error\";\n                    notifmsg.payload.text = \"Device is not transmitting\";\n                    notifmsg.payload.statuschange = true;\n                    state = 99;\n                    context.set(\"state\", state);\n                }\n            }\n            notifmsg.payload.state = state;\n            if (state===1) {\n                node.status({ fill: \"blue\", shape: \"ring\", text: queuecount+ \" | \"+notifmsg.payload.updatetext });\n            } else {\n                node.status({ fill: \"red\", shape: \"ring\", text: queuecount + \" | \" + notifmsg.payload.updatetext });\n            }\n            return [null, null, notifmsg];\n\n        } else {\n            node.status({ fill: \"grey\", shape: \"ring\", text: \"No data\" });\n        }\n        break;\n    case \"next\":\n        // Update the lastupdate counter\n        context.set(\"lastupdate\", current);\n        context.set(\"sent\", false);\n        send = true;\n        break;\n    case \"reset\":\n        context.set(\"queue\",[]);\n        context.set(\"sent\", false);\n        context.set(\"lastmsg\", undefined);\n        break;\n    default:\n        // The incoming message is a modbus request\n\n        // delete the last msg to prevent from being resent\n        // context.set(\"lastmsg\", undefined);\n\n        // Check if there is already a message in the queue with the same topic. \n        // If there is it needs to be deleted, because we only keep the last message.\n        for (let i=queue.length-1; i>=0; i--) {\n            if (queue[i].topic === msg.topic) {\n                queue.splice(i,1);\n            }\n        }\n\n        // Add the message to the end of the queue\n        queue.push(msg);\n        context.set(\"queue\",queue);\n\n        if (!context.get(\"sent\")) {\n            send = true;\n        }\n        node.status({ fill: \"green\", shape: \"dot\", text: queue.length });\n\n}\n\n// We need to send out a new message\nif (send) {\n\n    if (queue.length>0) {\n        // Get the older message from the array\n        let newmsg = queue[0];\n        // remove this message\n        queue.splice(0,1);\n        context.set(\"queue\",queue);\n        context.set(\"sent\", true);\n        context.set(\"lastmsg\", newmsg);\n\n        if ((newmsg.payload.fc === 1) || (newmsg.payload.fc === 2) || (newmsg.payload.fc === 3) || (newmsg.payload.fc === 4)) {\n            // this is a modbus read request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Read sent!\" });\n            return[newmsg,null,null];\n        } else {\n            // this is a modbus write request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Write sent!\" });\n            return [null, newmsg, null];\n        }\n        \n    }\n}\n",
-        "outputs": 3,
+        "d": true,
+        "name": "State Detection",
+        "func": "// Obtener las últimas lecturas de volumen del contexto\nlet lecturasVolumen = flow.get(\"lecturasVolumen\") || [];\n\n// Añadir la nueva lectura\nlecturasVolumen.push(msg.payload.volumen);\n\n// Mantener solo las últimas 10 lecturas\nif (lecturasVolumen.length > 10) {\n    lecturasVolumen.shift();\n}\n\n// Guardar las lecturas actualizadas en el contexto\nflow.set(\"lecturasVolumen\", lecturasVolumen);\n\n// Inicializar contadores\nlet aumentos = 0;\nlet disminuciones = 0;\nlet estables = 0;\n\n// Analizar las lecturas para detectar el estado\nfor (let i = 1; i < lecturasVolumen.length; i++) {\n    let diferencia = lecturasVolumen[i] - lecturasVolumen[i - 1];\n    if (diferencia > 0) {\n        aumentos++;\n        disminuciones = 0;\n        estables = 0;\n    } else if (diferencia < 0) {\n        disminuciones++;\n        aumentos = 0;\n        estables = 0;\n    } else {\n        estables++;\n        aumentos = 0;\n        disminuciones = 0;\n    }\n}\n\n// Determinar el estado\nlet estado = flow.get(\"estado\") || \"Desconocido\";\n\nif (aumentos >= 4) {\n    estado = \"Relleno\";\n} else if (disminuciones >= 4) {\n    estado = \"Alimentación\";\n} else if (estables >= 10 && Math.abs(lecturasVolumen[lecturasVolumen.length - 1] - lecturasVolumen[lecturasVolumen.length - 2]) <= 20) {\n    estado = \"Estable\";\n}\n\n// Guardar el estado en el contexto\nflow.set(\"estado\", estado);\n\n// Añadir el estado al mensaje\nmsg.estado = estado;\n\n// Pasar el mensaje al siguiente nodo\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1860,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2ef0ebdea5ea4864",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Flow Calculation Node",
+        "func": "const cola = msg.payload;\nlet flujo = 0;\n\nif (cola.length > 1) {\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0) {\n        flujo = Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600); // calcular flujo\n    }\n} else {\n    // Manejar el caso cuando no hay suficientes registros para calcular un flujo\n    flujo = \"Insuficientes datos para cálculo de flujo\";\n}\n\n// Devolver el valor del flujo\nreturn { payload: flujo };\n",
+        "outputs": 1,
         "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 870,
-        "y": 1740,
+        "x": 1280,
+        "y": 60,
         "wires": [
-            [
-                "7f618a8ae0582fb0"
-            ],
-            [],
-            [
-                "a4b94911743d7356"
-            ]
-        ],
-        "info": "# Modbus Queue\r\n\r\nThis node queueing read and write messages for modbus. Use this node if you are reading and writing the same device with many different requests. E.g. reading different coil/register intervals continously and also writing to the device at the same time.\r\n\r\nIt does a few things:\r\n- queues all messages arrive on the input port\r\n- based on the msg.topic, older messages of the same topci is ignored\r\n- sends out the oldest message and waits for the \r\n- monitors the time since last message and send out report on the output\r\n- handles online/offline status\r\n- resend the last message is response is not received in time\r\n\r\n## Input Data\r\n\r\n### payload\r\n\r\nThe payload should contain the data that gets sent to the flex-getter or flex-write node.\r\nTypical modbus read payload:\r\n`{\"value\":0,\"fc\":3,\"unitid\":1,\"address\":1000,\"quantity\":20}`\r\nTypical modbus write payload:\r\n`{\"value\":false,\"fc\":5,\"unitid\":1,\"address\":0,\"quantity\":1}`\r\n\r\n### topic\r\n\r\nEach message must contain a topic (any text), and this topic is used to identify the different read/write requests and delete any earlier request with the same topic if it still in the queueing\r\n\r\nThere are a few reserved topic for special function (for these payload is ignored):\r\n- reset: resets the queue and deleted any data collected so far\r\n- next: this is the message fed back from the flex getter/write node to indicate to this node that a new message can be sent out\r\n- update: this should be coming from a 1 second time to display the current queue count, time since the last update and online/offline status\r\n\r\n## Output ports\r\n\r\n### Port 1: flex getter\r\n\r\nThis output should be connected to a modbos-flex-getter and all the read requests will be sent out through this port\r\n\r\n### Port 2: flex write\r\n\r\nThis output should be connected to a modbos-flex-write and all the write requests will be sent out through this port\r\n\r\n### Port 3: status messages\r\n\r\nThis port outputs a status message for every update message (msg.topic=\"update\").\r\n\r\n- topic: \"Information\" for regular updates, \"Warning\": offline device is now back online, \"Error\": device is offline\r\n- payload.text: message like when the device gone offline, or back online\r\n- payload.updatetext: time passed since the last update (human readable format)\r\n- payload.secondsincelastupdate: number of seconds since the last update from the device\r\n- payload.statuschange: true if status is changed (gone offline, back online)\r\n- payload.state: 0: initial state, no data yet, 1: device online, 99: device offline\r\n\r\n## Node Settings\r\n\r\nChange the settings in the first 4 lines of the code to influence the behaviour. Explanation is in the code as comment."
-    },
-    {
-        "id": "a15aeace28a5ac33",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "reset",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "update",
-        "payload": "",
-        "payloadType": "date",
-        "x": 640,
-        "y": 1460,
-        "wires": [
-            [
-                "ca69ac29a4bc8759"
-            ]
+            []
         ]
     },
     {
-        "id": "8ec7b1cd8c68062b",
-        "type": "link in",
-        "z": "cf449ce1322fd8eb",
-        "name": "link in 56",
-        "links": [],
-        "x": 685,
-        "y": 1420,
-        "wires": [
-            [
-                "ca69ac29a4bc8759"
-            ]
-        ]
-    },
-    {
-        "id": "a4b94911743d7356",
+        "id": "08481f95f5e7ae86",
         "type": "function",
         "z": "cf449ce1322fd8eb",
-        "name": "update log",
-        "func": "if (msg.topic === \"Information\") {\n    // Registrar mensajes de información\n    node.log(\"Información: \" + msg.payload.updatetext);\n} else if (msg.topic === \"Warning\") {\n    // Registrar mensajes de advertencia\n    node.warn(\"Advertencia: \" + msg.payload.text);\n} else if (msg.topic === \"Error\") {\n    // Registrar mensajes de error\n    node.error(\"Error: \" + msg.payload.text);\n}\n\n// Puedes agregar lógica adicional para procesar otros campos del mensaje de estado\n// Por ejemplo, puedes verificar el valor de msg.payload.state para realizar acciones específicas\n// según el estado del dispositivo (en línea, fuera de línea, etc.)\n\nreturn msg;",
+        "name": "Data Accumulation Node",
+        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload[0] // Asumiendo que el volumen viene en msg.payload como primer elemento del array\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1270,
+        "y": 120,
+        "wires": [
+            [
+                "2ef0ebdea5ea4864"
+            ]
+        ]
+    },
+    {
+        "id": "f072d5245b0083c4",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Flow Calculation Node",
+        "func": "const cola = msg.payload;\nlet flujo = 0;\n\nif (cola.length > 1) {\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0) {\n        flujo = Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600); // calcular flujo\n    }\n} else {\n    // Manejar el caso cuando no hay suficientes registros para calcular un flujo\n    flujo = \"Insuficientes datos para cálculo de flujo\";\n}\n\n// Devolver el valor del flujo\nreturn { payload: flujo };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1760,
+        "y": 1060,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8bfb32aad261daeb",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Data Accumulation Node",
+        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual\nconst tiempoRegistro = Date.now();\ncola.push({\n    tiempo: tiempoRegistro,\n    valor: msg.payload // Usar msg.payload directamente\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1750,
+        "y": 1120,
+        "wires": [
+            [
+                "f072d5245b0083c4",
+                "34f58050e2572dc8"
+            ]
+        ]
+    },
+    {
+        "id": "73793c2aa437a1be",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "CalculoFlujo",
+        "func": "// Claves para almacenar en el contexto del flujo\nconst COLA_LECTURAS_KEY = \"colaLecturas\";\nconst ESTADO_TANQUE_KEY = \"estadoTanque\";\nconst VALOR_FIJO_KEY = \"valorFijo\";\n\n// Función para detectar el estado del tanque\nfunction detectarEstado(lecturas) {\n    if (lecturas.length < 4) return \"desconocido\";\n    \n    let aumentos = 0;\n    let disminuciones = 0;\n    let estables = 0;\n    \n    for (let i = lecturas.length - 4; i < lecturas.length - 1; i++) {\n        let diferencia = lecturas[i + 1].volumen - lecturas[i].volumen;\n        if (diferencia > 0) {\n            aumentos++;\n        } else if (diferencia < 0) {\n            disminuciones++;\n        } else if (Math.abs(diferencia) <= 20) {\n            estables++;\n        }\n    }\n    \n    if (aumentos >= 4) {\n        return \"rellenando\";\n    } else if (disminuciones >= 4) {\n        return \"alimentando\";\n    } else if (estables >= 10) {\n        return \"estable\";\n    } else {\n        return \"desconocido\";\n    }\n}\n\n// Función para calcular el flujo\nfunction calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * 40000;\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * 40000;\n\n    if (tiempoDiferencia > 0) {\n        let flujoCalculado = Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600); // calcular flujo en L/h\n        return flujoCalculado;\n    } else {\n        return 0;\n    }\n}\n\n// Obtener la cola de lecturas y otros valores del contexto\nlet colaLecturas = flow.get(COLA_LECTURAS_KEY) || [];\nlet estadoTanque = flow.get(ESTADO_TANQUE_KEY) || \"desconocido\";\nlet valorFijo = flow.get(VALOR_FIJO_KEY) || 0;\n\n// Añadir la nueva lectura\nconst nuevaLectura = {\n    tiempo: Date.now(),\n    volumen: msg.payload // Asumiendo que el volumen viene en msg.payload\n};\n\ncolaLecturas.push(nuevaLectura);\n\n// Mantener solo las últimas 15 lecturas\nif (colaLecturas.length > 15) colaLecturas.shift();\n\n// Detectar el estado actual del tanque\nconst nuevoEstado = detectarEstado(colaLecturas);\n\n// Manejar cambios de estado\nif (nuevoEstado !== estadoTanque) {\n    if (nuevoEstado === \"rellenando\") {\n        // Calcular el valor fijo usando las lecturas antes del inicio del relleno\n        // Excluimos las últimas 4 lecturas que indican el inicio del relleno\n        const lecturasAntesRelleno = colaLecturas.slice(0, -4);\n        if (lecturasAntesRelleno.length >= 2) {\n            valorFijo = calcularFlujo(lecturasAntesRelleno);\n            flow.set(VALOR_FIJO_KEY, valorFijo);\n        } else {\n            valorFijo = 0; // Si no hay suficientes lecturas, establecemos 0\n            flow.set(VALOR_FIJO_KEY, valorFijo);\n        }\n    } else if (nuevoEstado === \"alimentando\") {\n        valorFijo = 0; // Resetear el valor fijo al comenzar la alimentación\n        flow.set(VALOR_FIJO_KEY, valorFijo);\n    }\n    estadoTanque = nuevoEstado;\n    flow.set(ESTADO_TANQUE_KEY, estadoTanque);\n}\n\n// Calcular el flujo según el estado actual\nlet flujoCalculado;\nif (estadoTanque === \"rellenando\") {\n    flujoCalculado = valorFijo;\n    node.status({fill:\"yellow\", shape:\"ring\", text:\"Rellenando - Usando valor fijo\"});\n} else if (estadoTanque === \"alimentando\") {\n    flujoCalculado = calcularFlujo(colaLecturas);\n    node.status({fill:\"green\", shape:\"dot\", text:\"Alimentando - Flujo calculado\"});\n} else if (estadoTanque === \"estable\") {\n    flujoCalculado = 0;\n    node.status({fill:\"blue\", shape:\"ring\", text:\"Estable - Flujo cero\"});\n} else {\n    flujoCalculado = 0;\n    node.status({fill:\"grey\", shape:\"ring\", text:\"Estado desconocido\"});\n}\n\n// Guardar la cola de lecturas actualizada en el contexto\nflow.set(COLA_LECTURAS_KEY, colaLecturas);\n\n// Devolver el flujo calculado\nreturn { payload: flujoCalculado, estado: estadoTanque };\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1080,
-        "y": 1760,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "42d828a7d63309fb",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 580,
-        "y": 1740,
+        "x": 1610,
+        "y": 360,
         "wires": [
             [
-                "ca69ac29a4bc8759"
+                "e3b3819b25087cd6"
             ]
         ]
     },
     {
-        "id": "f43b6bb0b654e6db",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "calc_vol",
-        "func": "const valorCrudo = msg.payload[0];\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Mantener solo el valor numérico\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1560,
-        "y": 1680,
-        "wires": [
-            [
-                "369f074ba98950fb",
-                "b6b27084a73de3f1"
-            ]
-        ]
-    },
-    {
-        "id": "7f618a8ae0582fb0",
-        "type": "modbus-flex-getter",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1",
-        "showStatusActivities": false,
-        "showErrors": false,
-        "showWarnings": true,
-        "logIOActivities": false,
-        "server": "0274315f4b847684",
-        "useIOFile": false,
-        "ioFile": "",
-        "useIOForPayload": false,
-        "emptyMsgOnFail": false,
-        "keepMsgProperties": false,
-        "delayOnStart": false,
-        "startDelayTime": "",
-        "x": 1090,
-        "y": 1700,
-        "wires": [
-            [
-                "424252db1ddad2e6",
-                "9f18580871df255f"
-            ],
-            []
-        ]
-    },
-    {
-        "id": "9f18580871df255f",
-        "type": "switch",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1 Registers",
-        "property": "topic",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "read_ADC1_AI0",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "read_ADC1_AI1",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "read_ADC1_AI2",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 3,
-        "x": 1320,
-        "y": 1680,
-        "wires": [
-            [],
-            [
-                "f43b6bb0b654e6db",
-                "4eecad812182fc46"
-            ],
-            []
-        ]
-    },
-    {
-        "id": "369f074ba98950fb",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "telemetria",
-        "func": "msg.payload = {\n  volumen: msg.payload\n};\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1700,
-        "y": 1680,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "dbd9f49e2a572e0c",
-        "type": "ui-chart",
-        "z": "cf449ce1322fd8eb",
-        "group": "3f690bb5a526a246",
-        "name": "Vol FA-02 1",
-        "label": "Volumen FA-02 1",
-        "order": 2,
-        "chartType": "bar",
-        "category": "label",
-        "categoryType": "property",
-        "xAxisProperty": "",
-        "xAxisPropertyType": "msg",
-        "xAxisType": "category",
-        "yAxisProperty": "value",
-        "ymin": "0",
-        "ymax": "40000",
-        "action": "replace",
-        "pointShape": "circle",
-        "pointRadius": 4,
-        "showLegend": false,
-        "removeOlder": 1,
-        "removeOlderUnit": "3600",
-        "removeOlderPoints": "",
-        "colors": [
-            "#227dbf",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "width": "1",
-        "height": "5",
-        "className": "",
-        "x": 2010,
-        "y": 1680,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "b6b27084a73de3f1",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "formato_ui",
-        "func": "msg.payload = {\n    value: msg.payload,\n    label: msg.payload + \" Litros\"\n};\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1850,
-        "y": 1680,
-        "wires": [
-            [
-                "dbd9f49e2a572e0c"
-            ]
-        ]
-    },
-    {
-        "id": "27acebd6fccee10c",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "inject1",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 720,
-        "y": 1300,
-        "wires": [
-            [
-                "310eeb33d4324703"
-            ]
-        ]
-    },
-    {
-        "id": "8d83d24e6fa3ee64",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "inject1",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 720,
-        "y": 1340,
-        "wires": [
-            [
-                "b10ff3f6aca3195f"
-            ]
-        ]
-    },
-    {
-        "id": "310eeb33d4324703",
-        "type": "change",
-        "z": "cf449ce1322fd8eb",
-        "name": "set flow.flags",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 900,
-        "y": 1300,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "b10ff3f6aca3195f",
-        "type": "change",
-        "z": "cf449ce1322fd8eb",
-        "name": "set flow.registers",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 920,
-        "y": 1340,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "210420523658be70",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1_AI0",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "2",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "1",
-        "topic": "read_ADC1_AI0",
-        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":0,\"quantity\":1}",
-        "payloadType": "json",
-        "x": 600,
-        "y": 1620,
-        "wires": [
-            [
-                "ca69ac29a4bc8759"
-            ]
-        ]
-    },
-    {
-        "id": "b1afe634f11e8770",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1_AI1",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "2",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "1",
-        "topic": "read_ADC1_AI1",
-        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":1,\"quantity\":1}",
-        "payloadType": "json",
-        "x": 600,
-        "y": 1660,
-        "wires": [
-            [
-                "ca69ac29a4bc8759"
-            ]
-        ]
-    },
-    {
-        "id": "477ad3560ea84fc1",
+        "id": "e3b3819b25087cd6",
         "type": "ui-gauge",
         "z": "cf449ce1322fd8eb",
-        "name": "Flujo COPE 1",
+        "d": true,
+        "name": "Flujo COPE",
         "group": "3f690bb5a526a246",
         "order": 4,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
         "gstyle": "rounded",
-        "title": "Flujo COPE 1",
+        "title": "Flujo COPE",
         "units": "L/h",
         "icon": "",
         "prefix": "",
@@ -6349,129 +5931,285 @@
         "styleRounded": true,
         "styleGlow": false,
         "className": "",
-        "x": 2310,
-        "y": 1580,
+        "x": 1810,
+        "y": 360,
         "wires": []
     },
     {
-        "id": "4eecad812182fc46",
+        "id": "1c37b9c4281deee6",
         "type": "function",
         "z": "cf449ce1322fd8eb",
-        "name": "Acumulación de Datos y Detección de Estado",
-        "func": "const COLA_LECTURAS_KEY = \"colaLecturas\";\nconst ESTADO_TANQUE_KEY = \"estadoTanque\";\nconst INICIO_AUMENTO_KEY = \"inicioAumento\";\nconst ULTIMO_VOLUMEN_KEY = \"ultimoVolumen\";\nconst VALOR_FIJO_KEY = \"valorFijo\";\n\nfunction detectarInicioAumento(cola, umbralAlcanzado) {\n    for (let i = cola.length - 1; i > 0; i--) {\n        if (cola[i].volumen <= cola[i-1].volumen) {\n            return { tiempo: cola[i].tiempo, indice: i };\n        }\n        if (cola[i].tiempo <= umbralAlcanzado) {\n            return { tiempo: cola[i].tiempo, indice: i };\n        }\n    }\n    return { tiempo: cola[0].tiempo, indice: 0 };\n}\n\nfunction calcularPromedioAnterior(cola, indiceInicio) {\n    const lecturasPrevias = cola.slice(0, indiceInicio);\n    if (lecturasPrevias.length === 0) return 0;\n    const suma = lecturasPrevias.reduce((acc, lectura) => acc + lectura.volumen, 0);\n    return suma / lecturasPrevias.length;\n}\n\nfunction detectarCambioVolumen(ultimoVolumen, nuevoVolumen) {\n    if (nuevoVolumen > ultimoVolumen + 70) return \"rellenando\";\n    if (nuevoVolumen < ultimoVolumen - 5) return \"vaciando\";\n    return \"estable\";\n}\n\nlet colaLecturas = flow.get(COLA_LECTURAS_KEY) || [];\nlet estadoTanque = flow.get(ESTADO_TANQUE_KEY) || \"vaciando\";\nlet inicioAumento = flow.get(INICIO_AUMENTO_KEY) || null;\nlet ultimoVolumen = flow.get(ULTIMO_VOLUMEN_KEY) || msg.payload;\nlet valorFijo = flow.get(VALOR_FIJO_KEY) || 0;\n\nconst nuevaLectura = {\n    tiempo: Date.now(),\n    volumen: msg.payload\n};\n\nconst nuevoEstado = detectarCambioVolumen(ultimoVolumen, nuevaLectura.volumen);\n\nif (nuevoEstado === \"rellenando\" && estadoTanque !== \"rellenando\") {\n    const { tiempo: tiempoInicio, indice: indiceInicio } = detectarInicioAumento(colaLecturas, nuevaLectura.tiempo);\n    inicioAumento = tiempoInicio;\n    flow.set(INICIO_AUMENTO_KEY, inicioAumento);\n    \n    valorFijo = calcularPromedioAnterior(colaLecturas, indiceInicio);\n    flow.set(VALOR_FIJO_KEY, valorFijo);\n    \n    colaLecturas = colaLecturas.slice(0, indiceInicio);\n} else if (nuevoEstado === \"vaciando\" && estadoTanque !== \"vaciando\") {\n    // Iniciar nueva cola al comenzar a vaciar\n    colaLecturas = [];\n    inicioAumento = null;\n    flow.set(INICIO_AUMENTO_KEY, null);\n    valorFijo = 0;\n    flow.set(VALOR_FIJO_KEY, valorFijo);\n}\n\nestadoTanque = nuevoEstado;\nflow.set(ESTADO_TANQUE_KEY, estadoTanque);\n\nif (estadoTanque !== \"rellenando\") {\n    // Añadir la nueva lectura\n    colaLecturas.push(nuevaLectura);\n    \n    // Mantener solo los últimos 5 minutos de datos\n    const cincoMinutosAtras = Date.now() - 5 * 60 * 1000;\n    colaLecturas = colaLecturas.filter(lectura => lectura.tiempo >= cincoMinutosAtras);\n}\n\nflow.set(COLA_LECTURAS_KEY, colaLecturas);\nflow.set(ULTIMO_VOLUMEN_KEY, nuevaLectura.volumen);\n\nreturn { payload: { colaLecturas, estadoTanque, valorFijo } };",
+        "d": true,
+        "name": "Flow Calculation Node",
+        "func": "// Claves para almacenar en el contexto del flujo\nconst COLA_LECTURAS_KEY = \"colaLecturas\";\nconst ESTADO_TANQUE_KEY = \"estadoTanque\";\nconst VALOR_FIJO_KEY = \"valorFijo\";\n\n// Función para detectar el estado del tanque\nfunction detectarEstado(lecturas) {\n    if (lecturas.length < 4) return \"desconocido\";\n    \n    let aumentos = 0;\n    let disminuciones = 0;\n    let estables = 0;\n    \n    for (let i = lecturas.length - 4; i < lecturas.length - 1; i++) {\n        let diferencia = lecturas[i + 1].volumen - lecturas[i].volumen;\n        if (diferencia > 0) {\n            aumentos++;\n        } else if (diferencia < 0) {\n            disminuciones++;\n        } else if (Math.abs(diferencia) <= 20) {\n            estables++;\n        }\n    }\n    \n    if (aumentos >= 4) {\n        return \"rellenando\";\n    } else if (disminuciones >= 4) {\n        return \"alimentando\";\n    } else if (estables >= 10) {\n        return \"estable\";\n    } else {\n        return \"desconocido\";\n    }\n}\n\n// Función para calcular el flujo\nfunction calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * 40000;\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * 40000;\n\n    if (tiempoDiferencia > 0) {\n        let flujoCalculado = Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600); // calcular flujo en L/h\n        return flujoCalculado;\n    } else {\n        return 0;\n    }\n}\n\n// Obtener la cola de lecturas y otros valores del contexto\nlet colaLecturas = flow.get(COLA_LECTURAS_KEY) || [];\nlet estadoTanque = flow.get(ESTADO_TANQUE_KEY) || \"desconocido\";\nlet valorFijo = flow.get(VALOR_FIJO_KEY) || 0;\n\n// Añadir la nueva lectura\nconst nuevaLectura = {\n    tiempo: Date.now(),\n    volumen: msg.payload // Asumiendo que el volumen viene en msg.payload\n};\n\ncolaLecturas.push(nuevaLectura);\n\n// Mantener solo las últimas 15 lecturas\nif (colaLecturas.length > 15) colaLecturas.shift();\n\n// Detectar el estado actual del tanque\nconst nuevoEstado = detectarEstado(colaLecturas);\n\n// Manejar cambios de estado\nif (nuevoEstado !== estadoTanque) {\n    if (nuevoEstado === \"rellenando\") {\n        // Calcular el valor fijo usando las lecturas antes del inicio del relleno\n        // Excluimos las últimas 4 lecturas que indican el inicio del relleno\n        const lecturasAntesRelleno = colaLecturas.slice(0, -4);\n        if (lecturasAntesRelleno.length >= 2) {\n            valorFijo = calcularFlujo(lecturasAntesRelleno);\n            flow.set(VALOR_FIJO_KEY, valorFijo);\n        } else {\n            valorFijo = 0; // Si no hay suficientes lecturas, establecemos 0\n            flow.set(VALOR_FIJO_KEY, valorFijo);\n        }\n    } else if (nuevoEstado === \"alimentando\") {\n        valorFijo = 0; // Resetear el valor fijo al comenzar la alimentación\n        flow.set(VALOR_FIJO_KEY, valorFijo);\n    }\n    estadoTanque = nuevoEstado;\n    flow.set(ESTADO_TANQUE_KEY, estadoTanque);\n}\n\n// Calcular el flujo según el estado actual\nlet flujoCalculado;\nif (estadoTanque === \"rellenando\") {\n    flujoCalculado = valorFijo;\n    node.status({fill:\"yellow\", shape:\"ring\", text:\"Rellenando - Usando valor fijo\"});\n} else if (estadoTanque === \"alimentando\") {\n    flujoCalculado = calcularFlujo(colaLecturas);\n    node.status({fill:\"green\", shape:\"dot\", text:\"Alimentando - Flujo calculado\"});\n} else if (estadoTanque === \"estable\") {\n    flujoCalculado = 0;\n    node.status({fill:\"blue\", shape:\"ring\", text:\"Estable - Flujo cero\"});\n} else {\n    flujoCalculado = 0;\n    node.status({fill:\"grey\", shape:\"ring\", text:\"Estado desconocido\"});\n}\n\n// Guardar la cola de lecturas actualizada en el contexto\nflow.set(COLA_LECTURAS_KEY, colaLecturas);\n\n// Asegurarse de que flujoCalculado sea un número\nflujoCalculado = Number(flujoCalculado) || 0;\n\n// Log para depuración\nconsole.log(\"Flujo calculado:\", flujoCalculado, \"Estado:\", estadoTanque);\n\n// Devolver solo el valor numérico en el payload\nreturn { payload: flujoCalculado };",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1430,
-        "y": 1600,
+        "x": 2060,
+        "y": 580,
         "wires": [
-            [
-                "76600a253c295e6a",
-                "5a9ee6248151c6e7"
-            ]
+            []
         ]
     },
     {
-        "id": "76600a253c295e6a",
-        "type": "switch",
+        "id": "inject-node",
+        "type": "inject",
         "z": "cf449ce1322fd8eb",
-        "name": "Estado del Tanque",
-        "property": "payload.estadoTanque",
-        "propertyType": "msg",
-        "rules": [
+        "name": "Iniciar",
+        "props": [
             {
-                "t": "eq",
-                "v": "vaciando",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "rellenando",
-                "vt": "str"
+                "p": "payload"
             }
         ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 2,
-        "x": 1760,
-        "y": 1600,
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 890,
+        "y": 1100,
         "wires": [
             [
-                "32cb813eb69ca339"
-            ],
-            [
-                "18877a428c145d41"
+                "function-node"
             ]
         ]
     },
     {
-        "id": "32cb813eb69ca339",
+        "id": "function-node",
         "type": "function",
         "z": "cf449ce1322fd8eb",
-        "name": "Cálculo de Flujo (Vaciado)",
-        "func": "function calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0 && volumenInicial > volumenFinal) {\n        return Math.round(((volumenInicial - volumenFinal) / tiempoDiferencia) * 3600);\n    }\n    return 0;\n}\n\nconst { colaLecturas } = msg.payload;\n\nlet flujo = calcularFlujo(colaLecturas);\n\nreturn { payload: flujo, estadoTanque: \"vaciando\" };",
+        "name": "Decrementar",
+        "func": "let value = context.get('value');\n\nif (value === undefined || value < 0) {\n    value = 20000;\n}\n\nmsg.payload = value;\nvalue--;\ncontext.set('value', value);\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2010,
-        "y": 1580,
+        "x": 1060,
+        "y": 1100,
         "wires": [
             [
-                "477ad3560ea84fc1"
+                "delay-node",
+                "debug-node",
+                "6a099551450d6cf2",
+                "6912ce81cf94a075",
+                "e1a822778a0fd165",
+                "8bfb32aad261daeb"
             ]
         ]
     },
     {
-        "id": "18877a428c145d41",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Cálculo de Flujo (Rellenado)",
-        "func": "const { valorFijo } = msg.payload;\n\nreturn { payload: valorFijo, estadoTanque: \"rellenando\" };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2010,
-        "y": 1620,
-        "wires": [
-            [
-                "477ad3560ea84fc1"
-            ]
-        ]
-    },
-    {
-        "id": "739b7126e12f6d5a",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Procesamiento Unificado",
-        "func": "const COLA_LECTURAS_KEY = \"colaLecturas\";\nconst ESTADO_TANQUE_KEY = \"estadoTanque\";\nconst ULTIMO_VOLUMEN_KEY = \"ultimoVolumen\";\nconst VALOR_FIJO_KEY = \"valorFijo\";\n\nfunction detectarCambioVolumen(ultimoVolumen, nuevoVolumen) {\n    if (nuevoVolumen > ultimoVolumen + 70) return \"rellenando\";\n    if (nuevoVolumen < ultimoVolumen - 5) return \"vaciando\";\n    return \"estable\";\n}\n\nfunction calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0 && volumenInicial > volumenFinal) {\n        return Math.round(((volumenInicial - volumenFinal) / tiempoDiferencia) * 3600);\n    }\n    return 0;\n}\n\nlet colaLecturas = flow.get(COLA_LECTURAS_KEY) || [];\nlet estadoTanque = flow.get(ESTADO_TANQUE_KEY) || \"vaciando\";\nlet ultimoVolumen = flow.get(ULTIMO_VOLUMEN_KEY) || msg.payload;\nlet valorFijo = flow.get(VALOR_FIJO_KEY) || 0;\n\nconst nuevaLectura = {\n    tiempo: Date.now(),\n    volumen: msg.payload\n};\n\nconst nuevoEstado = detectarCambioVolumen(ultimoVolumen, nuevaLectura.volumen);\n\nif (nuevoEstado === \"rellenando\" && estadoTanque !== \"rellenando\") {\n    valorFijo = calcularFlujo(colaLecturas);\n    flow.set(VALOR_FIJO_KEY, valorFijo);\n    colaLecturas = [];\n} else if (nuevoEstado === \"vaciando\" && estadoTanque === \"rellenando\") {\n    colaLecturas = [];\n    valorFijo = 0;\n    flow.set(VALOR_FIJO_KEY, valorFijo);\n}\n\nestadoTanque = nuevoEstado;\nflow.set(ESTADO_TANQUE_KEY, estadoTanque);\n\nif (estadoTanque !== \"rellenando\") {\n    colaLecturas.push(nuevaLectura);\n    if (colaLecturas.length > 60) { // Mantener máximo 5 minutos de datos (asumiendo una lectura por segundo)\n        colaLecturas.shift();\n    }\n}\n\nflow.set(COLA_LECTURAS_KEY, colaLecturas);\nflow.set(ULTIMO_VOLUMEN_KEY, nuevaLectura.volumen);\n\nlet flujo = estadoTanque === \"rellenando\" ? valorFijo : calcularFlujo(colaLecturas);\n\nreturn { payload: flujo, estadoTanque: estadoTanque };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1620,
-        "y": 2040,
-        "wires": [
-            [
-                "0a3e9d7ce25017e8"
-            ]
-        ]
-    },
-    {
-        "id": "0a3e9d7ce25017e8",
+        "id": "delay-node",
         "type": "delay",
         "z": "cf449ce1322fd8eb",
-        "name": "Rate Limit",
+        "name": "Retardo 1 segundo",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1250,
+        "y": 1100,
+        "wires": [
+            [
+                "function-node"
+            ]
+        ]
+    },
+    {
+        "id": "debug-node",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Ver en consola",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 1260,
+        "y": 1160,
+        "wires": []
+    },
+    {
+        "id": "6912ce81cf94a075",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Data Accumulation Node",
+        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload // Usar directamente msg.payload\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1710,
+        "y": 840,
+        "wires": [
+            [
+                "aec536a7489b60be"
+            ]
+        ]
+    },
+    {
+        "id": "aec536a7489b60be",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Flow Calculation Node",
+        "func": "// Claves para almacenar en el contexto del flujo\nconst ESTADO_TANQUE_KEY = \"estadoTanque\";\nconst VALOR_FIJO_KEY = \"valorFijo\";\n\n// Obtener la cola de lecturas desde msg.payload\nlet colaLecturas = msg.payload;\n\n// Obtener el estado anterior y el valor fijo desde el contexto\nlet estadoTanque = flow.get(ESTADO_TANQUE_KEY) || \"desconocido\";\nlet valorFijo = flow.get(VALOR_FIJO_KEY) || 0;\n\n// Función para detectar el estado del tanque\nfunction detectarEstado(lecturas) {\n    if (lecturas.length < 4) return \"desconocido\";\n\n    let disminuciones = 0;\n    let aumentos = 0;\n    let estables = 0;\n\n    for (let i = lecturas.length - 4; i < lecturas.length - 1; i++) {\n        let diferencia = lecturas[i + 1].volumen - lecturas[i].volumen;\n        if (diferencia < -0.5) {\n            disminuciones++;\n        } else if (diferencia > 0.5) {\n            aumentos++;\n        } else {\n            estables++;\n        }\n    }\n\n    if (disminuciones >= 3) return \"alimentando\";\n    if (aumentos >= 3) return \"rellenando\";\n    if (estables >= 3) return \"estable\";\n    return \"desconocido\";\n}\n\n// Función para calcular el flujo\nfunction calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    if (tiempoDiferencia > 0) {\n        const volumenInicial = primerRegistro.volumen;\n        const volumenFinal = ultimoRegistro.volumen;\n        const diferenciaVolumen = volumenInicial - volumenFinal;\n        \n        // Convertir la diferencia de volumen a la escala de 0-40000\n        const diferenciaEscalada = (diferenciaVolumen / (20000 - 4000)) * 40000;\n        \n        // Calcular el flujo en L/h, siempre positivo\n        let flujoCalculado = Math.abs(Math.round((diferenciaEscalada / tiempoDiferencia) * 3600));\n        return flujoCalculado;\n    } else {\n        return 0;\n    }\n}\n\n// Detectar el estado actual del tanque\nconst nuevoEstado = detectarEstado(colaLecturas);\n\n// Manejar cambios de estado\nif (nuevoEstado !== estadoTanque) {\n    if (nuevoEstado === \"rellenando\") {\n        const lecturasAntesRelleno = colaLecturas.slice(0, -4);\n        if (lecturasAntesRelleno.length >= 2) {\n            valorFijo = calcularFlujo(lecturasAntesRelleno);\n            flow.set(VALOR_FIJO_KEY, valorFijo);\n        } else {\n            valorFijo = 0;\n            flow.set(VALOR_FIJO_KEY, valorFijo);\n        }\n    } else if (nuevoEstado === \"alimentando\") {\n        valorFijo = 0;\n        flow.set(VALOR_FIJO_KEY, valorFijo);\n    }\n    estadoTanque = nuevoEstado;\n    flow.set(ESTADO_TANQUE_KEY, estadoTanque);\n}\n\n// Calcular el flujo según el estado actual\nlet flujoCalculado;\nif (estadoTanque === \"rellenando\") {\n    flujoCalculado = valorFijo;\n    node.status({fill:\"yellow\", shape:\"ring\", text:\"Rellenando - Usando valor fijo\"});\n} else if (estadoTanque === \"alimentando\") {\n    flujoCalculado = calcularFlujo(colaLecturas);\n    node.status({fill:\"green\", shape:\"dot\", text:\"Alimentando - Flujo calculado\"});\n} else if (estadoTanque === \"estable\") {\n    flujoCalculado = 0;\n    node.status({fill:\"blue\", shape:\"ring\", text:\"Estable - Flujo cero\"});\n} else {\n    flujoCalculado = 0;\n    node.status({fill:\"grey\", shape:\"ring\", text:\"Estado desconocido\"});\n}\n\n// Asegurarse de que flujoCalculado sea un número positivo\nflujoCalculado = Math.abs(Number(flujoCalculado)) || 0;\n\n// Log para depuración\nconsole.log(\"Estado:\", estadoTanque, \"Flujo calculado:\", flujoCalculado);\n\n// Devolver el flujo calculado y el estado\nreturn [{ payload: flujoCalculado }, { payload: estadoTanque }];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1950,
+        "y": 840,
+        "wires": [
+            [
+                "08c3459fd6a3321e",
+                "bd046d660e3fb82f",
+                "e4ab6edbc55afaf3"
+            ],
+            [
+                "87a4cd70ddf38bd4"
+            ]
+        ]
+    },
+    {
+        "id": "08c3459fd6a3321e",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Debug Flujo",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 2180,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "87a4cd70ddf38bd4",
+        "type": "ui-text",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "group": "3f690bb5a526a246",
+        "order": 5,
+        "width": "5",
+        "height": "1",
+        "name": "Estado del Tanque",
+        "label": "Estado:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 2180,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "bd046d660e3fb82f",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Debug Estado",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "estadoTanque",
+        "targetType": "flow",
+        "x": 2190,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "e4ab6edbc55afaf3",
+        "type": "ui-gauge",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Flujo COPE",
+        "group": "3f690bb5a526a246",
+        "order": 4,
+        "width": "5",
+        "height": "4",
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Flujo COPE",
+        "units": "L/h",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ea5353"
+            },
+            {
+                "from": "4000",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "7500",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "10000",
+        "sizeThickness": "26",
+        "sizeGap": "3",
+        "sizeKeyThickness": "20",
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 2190,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "b6ece23c7664678a",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Incrementar",
+        "func": "let value = context.get('value') || 4000;\n\nif (value <= 20000) {\n    node.send({ payload: value });\n    value++; \n    context.set('value', value);\n} else {\n    context.set('value', 4000);\n}\nreturn null;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1050,
+        "y": 1220,
+        "wires": [
+            [
+                "40e565bc204794ba",
+                "3cc5a6c004a089cd",
+                "6a099551450d6cf2",
+                "6912ce81cf94a075",
+                "e1a822778a0fd165"
+            ]
+        ]
+    },
+    {
+        "id": "40e565bc204794ba",
+        "type": "delay",
+        "z": "cf449ce1322fd8eb",
+        "name": "Retardo 1 segundo",
         "pauseType": "rate",
         "timeout": "5",
         "timeoutUnits": "seconds",
@@ -6481,29 +6219,251 @@
         "randomFirst": "1",
         "randomLast": "5",
         "randomUnits": "seconds",
-        "drop": true,
+        "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 1860,
-        "y": 2040,
+        "x": 1250,
+        "y": 1220,
         "wires": [
             [
-                "95f45d8c5ec582f1"
+                "b6ece23c7664678a"
             ]
         ]
     },
     {
-        "id": "95f45d8c5ec582f1",
+        "id": "ecd5b6d0ef39cc32",
+        "type": "inject",
+        "z": "cf449ce1322fd8eb",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 890,
+        "y": 1220,
+        "wires": [
+            [
+                "b6ece23c7664678a"
+            ]
+        ]
+    },
+    {
+        "id": "3cc5a6c004a089cd",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Ver en consola",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 1260,
+        "y": 1280,
+        "wires": []
+    },
+    {
+        "id": "function-node-stable",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Simular Estado Estable",
+        "func": "let value = context.get('value') || 5000;\n\n// Generar un número aleatorio entre -5 y 5\nlet fluctuation = Math.floor(Math.random() * 11) - 5;\n\n// Aplicar la fluctuación al valor\nvalue += fluctuation;\n\n// Asegurar que el valor se mantenga en el rango de 4995 a 5005\nvalue = Math.max(4995, Math.min(5005, value));\n\n// Enviar el valor y guardarlo en el contexto\nnode.send({ payload: value });\ncontext.set('value', value);\n\nreturn null;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 1400,
+        "wires": [
+            [
+                "6c36579780f7f021",
+                "4f07c629f0ae2bd9",
+                "6912ce81cf94a075",
+                "e1a822778a0fd165",
+                "6a099551450d6cf2"
+            ]
+        ]
+    },
+    {
+        "id": "62d65a19d570dd02",
+        "type": "inject",
+        "z": "cf449ce1322fd8eb",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 850,
+        "y": 1400,
+        "wires": [
+            [
+                "function-node-stable"
+            ]
+        ]
+    },
+    {
+        "id": "6c36579780f7f021",
+        "type": "delay",
+        "z": "cf449ce1322fd8eb",
+        "name": "Retardo 1 segundo",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "outputs": 1,
+        "x": 1250,
+        "y": 1400,
+        "wires": [
+            [
+                "function-node-stable"
+            ]
+        ]
+    },
+    {
+        "id": "4f07c629f0ae2bd9",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Ver en consola",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 1260,
+        "y": 1460,
+        "wires": []
+    },
+    {
+        "id": "6a099551450d6cf2",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Data Accumulation Node",
+        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload // Usar directamente msg.payload\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1450,
+        "y": 1620,
+        "wires": [
+            [
+                "9af74103a3a25351"
+            ]
+        ]
+    },
+    {
+        "id": "9af74103a3a25351",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Flow Calculation Node",
+        "func": "// Claves para almacenar en el contexto del flujo\nconst ESTADO_TANQUE_KEY = \"estadoTanque\";\nconst VALOR_FIJO_KEY = \"valorFijo\";\n\n// Obtener la cola de lecturas desde msg.payload\nlet colaLecturas = msg.payload;\n\n// Obtener el estado anterior y el valor fijo desde el contexto\nlet estadoTanque = flow.get(ESTADO_TANQUE_KEY) || \"desconocido\";\nlet valorFijo = flow.get(VALOR_FIJO_KEY) || 0;\n\n// Función para detectar el estado del tanque\nfunction detectarEstado(lecturas) {\n    if (lecturas.length < 4) return \"desconocido\";\n\n    let disminuciones = 0;\n    let aumentos = 0;\n    let estables = 0;\n\n    for (let i = lecturas.length - 4; i < lecturas.length - 1; i++) {\n        let diferencia = lecturas[i + 1].volumen - lecturas[i].volumen;\n        if (diferencia < -0.5) {\n            disminuciones++;\n        } else if (diferencia > 0.5) {\n            aumentos++;\n        } else {\n            estables++;\n        }\n    }\n\n    if (disminuciones >= 3) return \"alimentando\";\n    if (aumentos >= 3) return \"rellenando\";\n    if (estables >= 3) return \"estable\";\n    return \"desconocido\";\n}\n\n// Función para calcular el flujo (sin cambios)\nfunction calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    if (tiempoDiferencia > 0) {\n        const volumenInicial = primerRegistro.volumen;\n        const volumenFinal = ultimoRegistro.volumen;\n        const diferenciaVolumen = volumenInicial - volumenFinal;\n        \n        // Convertir la diferencia de volumen a la escala de 0-40000\n        const diferenciaEscalada = (diferenciaVolumen / (20000 - 4000)) * 40000;\n        \n        // Calcular el flujo en L/h, siempre positivo\n        let flujoCalculado = Math.abs(Math.round((diferenciaEscalada / tiempoDiferencia) * 3600));\n        return flujoCalculado;\n    } else {\n        return 0;\n    }\n}\n\n// Detectar el estado actual del tanque\nconst nuevoEstado = detectarEstado(colaLecturas);\n\n// Manejar cambios de estado\nif (nuevoEstado !== estadoTanque) {\n    if (nuevoEstado === \"rellenando\") {\n        const lecturasAntesRelleno = colaLecturas.slice(0, -4);\n        if (lecturasAntesRelleno.length >= 2) {\n            valorFijo = calcularFlujo(lecturasAntesRelleno);\n            flow.set(VALOR_FIJO_KEY, valorFijo);\n        } else {\n            valorFijo = 0;\n            flow.set(VALOR_FIJO_KEY, valorFijo);\n        }\n    } else if (nuevoEstado === \"alimentando\") {\n        valorFijo = 0;\n        flow.set(VALOR_FIJO_KEY, valorFijo);\n    }\n    estadoTanque = nuevoEstado;\n    flow.set(ESTADO_TANQUE_KEY, estadoTanque);\n}\n\n// Calcular el flujo según el estado actual\nlet flujoCalculado;\nif (estadoTanque === \"rellenando\") {\n    flujoCalculado = valorFijo;\n    node.status({fill:\"yellow\", shape:\"ring\", text:\"Rellenando - Usando valor fijo\"});\n} else if (estadoTanque === \"alimentando\") {\n    flujoCalculado = calcularFlujo(colaLecturas);\n    node.status({fill:\"green\", shape:\"dot\", text:\"Alimentando - Flujo calculado\"});\n} else if (estadoTanque === \"estable\") {\n    flujoCalculado = 0;  // Flujo cero en estado estable\n    node.status({fill:\"blue\", shape:\"ring\", text:\"Estable - Flujo cero\"});\n} else {\n    flujoCalculado = 0;  // Flujo cero en estado desconocido\n    node.status({fill:\"grey\", shape:\"ring\", text:\"Estado desconocido - Flujo cero\"});\n}\n\n// Log para depuración\nconsole.log(\"Estado:\", estadoTanque, \"Flujo calculado:\", flujoCalculado);\n\n// Devolver el flujo calculado y el estado\nreturn [{ payload: flujoCalculado }, { payload: estadoTanque }];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1690,
+        "y": 1620,
+        "wires": [
+            [
+                "c6238902c4c4e08e",
+                "a7939e1ed6d563bd",
+                "7f97a33f373e36b9"
+            ],
+            [
+                "a3e3b188f84cb22e"
+            ]
+        ]
+    },
+    {
+        "id": "c6238902c4c4e08e",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Debug Flujo",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 1920,
+        "y": 1620,
+        "wires": []
+    },
+    {
+        "id": "a3e3b188f84cb22e",
+        "type": "ui-text",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "group": "3f690bb5a526a246",
+        "order": 5,
+        "width": "5",
+        "height": "1",
+        "name": "Estado del Tanque",
+        "label": "Estado:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1920,
+        "y": 1660,
+        "wires": []
+    },
+    {
+        "id": "a7939e1ed6d563bd",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Debug Estado",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "estadoTanque",
+        "targetType": "flow",
+        "x": 1930,
+        "y": 1540,
+        "wires": []
+    },
+    {
+        "id": "7f97a33f373e36b9",
         "type": "ui-gauge",
         "z": "cf449ce1322fd8eb",
-        "name": "Flujo COPE 2",
+        "d": true,
+        "name": "Flujo COPE",
         "group": "3f690bb5a526a246",
         "order": 4,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
         "gstyle": "rounded",
-        "title": "Flujo COPE 2",
+        "title": "Flujo COPE",
         "units": "L/h",
         "icon": "",
         "prefix": "",
@@ -6530,179 +6490,95 @@
         "styleRounded": true,
         "styleGlow": false,
         "className": "",
-        "x": 2100,
-        "y": 2020,
+        "x": 1930,
+        "y": 1580,
         "wires": []
     },
     {
-        "id": "224cd9f7384a2a68",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "update",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "update",
-        "payload": "",
-        "payloadType": "date",
-        "x": 820,
-        "y": 2080,
-        "wires": [
-            [
-                "afb2dfa2e5c537eb"
-            ]
-        ]
-    },
-    {
-        "id": "1d81203667db302d",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "next",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "next",
-        "payload": "",
-        "payloadType": "date",
-        "x": 490,
-        "y": 2200,
-        "wires": [
-            [
-                "afb2dfa2e5c537eb"
-            ]
-        ]
-    },
-    {
-        "id": "366cb2796a98e886",
-        "type": "change",
-        "z": "cf449ce1322fd8eb",
-        "name": "Advance queue",
-        "rules": [
-            {
-                "t": "set",
-                "p": "topic",
-                "pt": "msg",
-                "to": "next",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 1110,
-        "y": 2080,
-        "wires": [
-            [
-                "afb2dfa2e5c537eb"
-            ]
-        ]
-    },
-    {
-        "id": "afb2dfa2e5c537eb",
+        "id": "34f58050e2572dc8",
         "type": "function",
         "z": "cf449ce1322fd8eb",
-        "name": "Modbus Queue",
-        "func": "let resendifnoresposne = true; // resend the last message is no response is received\nlet resendinterval = 10; // resend last e message every x seconds\nlet online_threshold = 10; // Seconds between updates under which the device is considered online\nlet offline_threshold = 300; // Seconds between updates above which the device is considered offline\n\nlet notifmsg = null;\n\n// Check and make sure the incoming message has a topic\nif ((msg.topic===\"\")||(msg.topic===null)||(msg.topic===undefined)) {\n    node.status({fill:\"red\",shape:\"dot\",text:\"Topic missing\"});\n    return;\n}\n\nlet lastupdate = context.get(\"lastupdate\");\nlet state = context.get(\"state\") | 0;\nlet queue = context.get(\"queue\");\nlet queuecount = 0;\nif (queue === undefined) {\n    queue = [];\n} else {\n    if (Array.isArray(queue)) {\n        queuecount = queue.length;\n    } else {\n        queue = [];\n    }\n}\nlet current = new Date().getTime();\nlet send = false;\n\nswitch (msg.topic.toLowerCase()) {\n    case \"update\":\n        // Update the timer and statistics\n\n        if (lastupdate !== undefined) {\n            notifmsg = { \"topic\": \"Information\", \"payload\": {} };\n            current = current - lastupdate;\n            current = Math.floor(current / 1000);\n            notifmsg.payload.secondsincelastupdate = current;\n            var minute = Math.floor(current / 60);\n            var hour = Math.floor(minute / 60);\n            var day = Math.floor(hour / 24);\n            if (current > 24 * 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + day + \" days, \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60) {\n                notifmsg.payload.updatetext = \"Last update \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else {\n                notifmsg.payload.updatetext = \"Last update \" + current % 60 + \" seconds ago\";\n            }\n\n            // Resend last message if there is no response from the server\n            if (resendifnoresposne) {\n                if ((current>0) && (current % resendinterval===0)) {\n                    let lastmsg = context.get(\"lastmsg\");\n                    if ((lastmsg!==undefined) && (context.get(\"sent\"))) {\n                        notifmsg.payload.resend = true;\n                        if ((lastmsg.payload.fc === 1) || (lastmsg.payload.fc === 2) || (lastmsg.payload.fc === 3) || (lastmsg.payload.fc === 4)) {\n                            // this is a modbus read request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Read re-sent!\" });\n                            return [lastmsg, null, notifmsg];\n                        } else {\n                            // this is a modbus write request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Write re-sent!\" });\n                            return [null, lastmsg, notifmsg];\n                        }\n                    }\n                }\n            }\n\n            // Check for online state\n            if (state !== 1) {\n                if (current < online_threshold) {\n                    notifmsg.topic = \"Warning\";\n                    notifmsg.payload.text = \"Device is now online\";\n                    notifmsg.payload.statuschange = true;\n                    state = 1;\n                    context.set(\"state\", state);\n                }\n            } else {\n                if (current > offline_threshold) {\n                    notifmsg.topic = \"Error\";\n                    notifmsg.payload.text = \"Device is not transmitting\";\n                    notifmsg.payload.statuschange = true;\n                    state = 99;\n                    context.set(\"state\", state);\n                }\n            }\n            notifmsg.payload.state = state;\n            if (state===1) {\n                node.status({ fill: \"blue\", shape: \"ring\", text: queuecount+ \" | \"+notifmsg.payload.updatetext });\n            } else {\n                node.status({ fill: \"red\", shape: \"ring\", text: queuecount + \" | \" + notifmsg.payload.updatetext });\n            }\n            return [null, null, notifmsg];\n\n        } else {\n            node.status({ fill: \"grey\", shape: \"ring\", text: \"No data\" });\n        }\n        break;\n    case \"next\":\n        // Update the lastupdate counter\n        context.set(\"lastupdate\", current);\n        context.set(\"sent\", false);\n        send = true;\n        break;\n    case \"reset\":\n        context.set(\"queue\",[]);\n        context.set(\"sent\", false);\n        context.set(\"lastmsg\", undefined);\n        break;\n    default:\n        // The incoming message is a modbus request\n\n        // delete the last msg to prevent from being resent\n        // context.set(\"lastmsg\", undefined);\n\n        // Check if there is already a message in the queue with the same topic. \n        // If there is it needs to be deleted, because we only keep the last message.\n        for (let i=queue.length-1; i>=0; i--) {\n            if (queue[i].topic === msg.topic) {\n                queue.splice(i,1);\n            }\n        }\n\n        // Add the message to the end of the queue\n        queue.push(msg);\n        context.set(\"queue\",queue);\n\n        if (!context.get(\"sent\")) {\n            send = true;\n        }\n        node.status({ fill: \"green\", shape: \"dot\", text: queue.length });\n\n}\n\n// We need to send out a new message\nif (send) {\n\n    if (queue.length>0) {\n        // Get the older message from the array\n        let newmsg = queue[0];\n        // remove this message\n        queue.splice(0,1);\n        context.set(\"queue\",queue);\n        context.set(\"sent\", true);\n        context.set(\"lastmsg\", newmsg);\n\n        if ((newmsg.payload.fc === 1) || (newmsg.payload.fc === 2) || (newmsg.payload.fc === 3) || (newmsg.payload.fc === 4)) {\n            // this is a modbus read request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Read sent!\" });\n            return[newmsg,null,null];\n        } else {\n            // this is a modbus write request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Write sent!\" });\n            return [null, newmsg, null];\n        }\n        \n    }\n}\n",
-        "outputs": 3,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1110,
-        "y": 2200,
-        "wires": [
-            [
-                "9ccb484b7aca3e86"
-            ],
-            [],
-            [
-                "6c2fac3e1a695d44"
-            ]
-        ],
-        "info": "# Modbus Queue\r\n\r\nThis node queueing read and write messages for modbus. Use this node if you are reading and writing the same device with many different requests. E.g. reading different coil/register intervals continously and also writing to the device at the same time.\r\n\r\nIt does a few things:\r\n- queues all messages arrive on the input port\r\n- based on the msg.topic, older messages of the same topci is ignored\r\n- sends out the oldest message and waits for the \r\n- monitors the time since last message and send out report on the output\r\n- handles online/offline status\r\n- resend the last message is response is not received in time\r\n\r\n## Input Data\r\n\r\n### payload\r\n\r\nThe payload should contain the data that gets sent to the flex-getter or flex-write node.\r\nTypical modbus read payload:\r\n`{\"value\":0,\"fc\":3,\"unitid\":1,\"address\":1000,\"quantity\":20}`\r\nTypical modbus write payload:\r\n`{\"value\":false,\"fc\":5,\"unitid\":1,\"address\":0,\"quantity\":1}`\r\n\r\n### topic\r\n\r\nEach message must contain a topic (any text), and this topic is used to identify the different read/write requests and delete any earlier request with the same topic if it still in the queueing\r\n\r\nThere are a few reserved topic for special function (for these payload is ignored):\r\n- reset: resets the queue and deleted any data collected so far\r\n- next: this is the message fed back from the flex getter/write node to indicate to this node that a new message can be sent out\r\n- update: this should be coming from a 1 second time to display the current queue count, time since the last update and online/offline status\r\n\r\n## Output ports\r\n\r\n### Port 1: flex getter\r\n\r\nThis output should be connected to a modbos-flex-getter and all the read requests will be sent out through this port\r\n\r\n### Port 2: flex write\r\n\r\nThis output should be connected to a modbos-flex-write and all the write requests will be sent out through this port\r\n\r\n### Port 3: status messages\r\n\r\nThis port outputs a status message for every update message (msg.topic=\"update\").\r\n\r\n- topic: \"Information\" for regular updates, \"Warning\": offline device is now back online, \"Error\": device is offline\r\n- payload.text: message like when the device gone offline, or back online\r\n- payload.updatetext: time passed since the last update (human readable format)\r\n- payload.secondsincelastupdate: number of seconds since the last update from the device\r\n- payload.statuschange: true if status is changed (gone offline, back online)\r\n- payload.state: 0: initial state, no data yet, 1: device online, 99: device offline\r\n\r\n## Node Settings\r\n\r\nChange the settings in the first 4 lines of the code to influence the behaviour. Explanation is in the code as comment."
-    },
-    {
-        "id": "6cb1493962f617dd",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "reset",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "update",
-        "payload": "",
-        "payloadType": "date",
-        "x": 630,
-        "y": 2200,
-        "wires": [
-            [
-                "afb2dfa2e5c537eb"
-            ]
-        ]
-    },
-    {
-        "id": "6c2fac3e1a695d44",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "update log",
-        "func": "if (msg.topic === \"Information\") {\n    // Registrar mensajes de información\n    node.log(\"Información: \" + msg.payload.updatetext);\n} else if (msg.topic === \"Warning\") {\n    // Registrar mensajes de advertencia\n    node.warn(\"Advertencia: \" + msg.payload.text);\n} else if (msg.topic === \"Error\") {\n    // Registrar mensajes de error\n    node.error(\"Error: \" + msg.payload.text);\n}\n\n// Puedes agregar lógica adicional para procesar otros campos del mensaje de estado\n// Por ejemplo, puedes verificar el valor de msg.payload.state para realizar acciones específicas\n// según el estado del dispositivo (en línea, fuera de línea, etc.)\n\nreturn msg;",
+        "name": "function 43",
+        "func": "// Suponiendo que msg.payload es la cola de valores\nlet cola = msg.payload;\n\n// Verificar que haya suficientes datos para comparar\nif (cola.length >= 2) {\n    // Obtener los valores necesarios\n    const valorAnterior = cola[cola.length - 2].valor;\n    const valorActual = cola[cola.length - 1].valor;\n\n    // Comparar los valores para determinar la tendencia\n    if (valorActual > valorAnterior) {\n        msg.payload = 'aumentando';\n    } else if (valorActual < valorAnterior) {\n        msg.payload = 'disminuyendo';\n    } else {\n        msg.payload = 'sin cambio';\n    }\n} else {\n    // Si no hay suficientes datos, informar\n    msg.payload = 'Datos insuficientes para determinar la tendencia';\n}\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1320,
-        "y": 2220,
+        "x": 1990,
+        "y": 1060,
         "wires": [
             []
         ]
     },
     {
-        "id": "09ebe9e923a9f253",
+        "id": "0568bbba8b436882",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Decrementar",
+        "func": "let value = context.get('value');\n\nif (value === undefined || value <= 0) {\n    value = 20000;\n}\n\nmsg.payload = value;\nvalue--;\ncontext.set('value', value);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 2650,
+        "y": 2180,
+        "wires": [
+            [
+                "87f4069ec6b3f504",
+                "cd9fb8a2e7d6a362",
+                "316efee7c7e1cbce"
+            ]
+        ]
+    },
+    {
+        "id": "cd9fb8a2e7d6a362",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Ver Decrementar",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 2890,
+        "y": 2240,
+        "wires": []
+    },
+    {
+        "id": "87f4069ec6b3f504",
+        "type": "delay",
+        "z": "cf449ce1322fd8eb",
+        "name": "Retardo 2 segundos",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "",
+        "randomLast": "",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 2850,
+        "y": 2180,
+        "wires": [
+            [
+                "0568bbba8b436882"
+            ]
+        ]
+    },
+    {
+        "id": "142087131ac48d94",
         "type": "inject",
         "z": "cf449ce1322fd8eb",
-        "name": "",
+        "name": "Iniciar",
         "props": [
             {
                 "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
             }
         ],
         "repeat": "",
@@ -6712,1570 +6588,296 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 820,
-        "y": 2200,
+        "x": 2470,
+        "y": 2180,
         "wires": [
             [
-                "afb2dfa2e5c537eb"
+                "0568bbba8b436882"
             ]
         ]
     },
     {
-        "id": "9ccb484b7aca3e86",
-        "type": "modbus-flex-getter",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1",
-        "showStatusActivities": false,
-        "showErrors": false,
-        "showWarnings": true,
-        "logIOActivities": false,
-        "server": "0274315f4b847684",
-        "useIOFile": false,
-        "ioFile": "",
-        "useIOForPayload": false,
-        "emptyMsgOnFail": false,
-        "keepMsgProperties": false,
-        "delayOnStart": false,
-        "startDelayTime": "",
-        "x": 1330,
-        "y": 2160,
-        "wires": [
-            [
-                "366cb2796a98e886",
-                "ae7bb35aa7c03c8f"
-            ],
-            []
-        ]
-    },
-    {
-        "id": "cac7595402665978",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1_AI0",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "2",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "1",
-        "topic": "read_ADC1_AI0",
-        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":0,\"quantity\":1}",
-        "payloadType": "json",
-        "x": 800,
-        "y": 2120,
-        "wires": [
-            [
-                "afb2dfa2e5c537eb"
-            ]
-        ]
-    },
-    {
-        "id": "2287b93e64b2f3a8",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1_AI1",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "2",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "1",
-        "topic": "read_ADC1_AI1",
-        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":1,\"quantity\":1}",
-        "payloadType": "json",
-        "x": 800,
-        "y": 2160,
-        "wires": [
-            [
-                "afb2dfa2e5c537eb"
-            ]
-        ]
-    },
-    {
-        "id": "ae7bb35aa7c03c8f",
-        "type": "switch",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1 Registers",
-        "property": "topic",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "read_ADC1_AI0",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "read_ADC1_AI1",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "read_ADC1_AI2",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 3,
-        "x": 1560,
-        "y": 2140,
-        "wires": [
-            [],
-            [
-                "85a5a93d9c74c0dc",
-                "739b7126e12f6d5a"
-            ],
-            []
-        ]
-    },
-    {
-        "id": "85a5a93d9c74c0dc",
+        "id": "b4c67729d907f710",
         "type": "function",
         "z": "cf449ce1322fd8eb",
-        "name": "calc_vol",
-        "func": "const valorCrudo = msg.payload[0];\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Mantener solo el valor numérico\nreturn msg;\n",
+        "name": "Data Accumulation Node",
+        "func": "let lecturas = flow.get(\"lecturasVolumen\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual\nconst registro = {\n    tiempo: Date.now(),\n    volumen: msg.payload // Usar msg.payload directamente\n};\nlecturas.push(registro);\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nconst tiempoActual = Date.now();\nlecturas = lecturas.filter(r => (tiempoActual - r.tiempo) <= tiempoMaximo);\n\n// Guardar las lecturas actualizadas en el contexto del flujo\nflow.set(\"lecturasVolumen\", lecturas);\n\n// Pasar las lecturas completas al siguiente nodo para su procesamiento\nreturn { payload: lecturas };",
         "outputs": 1,
-        "timeout": 0,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1800,
-        "y": 2140,
+        "x": 2520,
+        "y": 2320,
         "wires": [
             [
-                "d3a4cc75a9339b75",
-                "3cd770d4dcead9a4"
+                "a2cecd8688116999",
+                "50f05e58605974bb"
             ]
         ]
     },
     {
-        "id": "d3a4cc75a9339b75",
+        "id": "a2cecd8688116999",
         "type": "function",
         "z": "cf449ce1322fd8eb",
-        "name": "telemetria",
-        "func": "msg.payload = {\n  volumen: msg.payload\n};\nreturn msg;",
+        "name": "Detectar Rellenado",
+        "func": "const lecturas = msg.payload;\nconst estadoAnterior = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoActual = estadoAnterior;\n\nconst umbralIncremento = 3; // Ajustar según el incremento que indique rellenado\nconst umbralLecturas = 5; // Número de lecturas para considerar el incremento\n\nif (lecturas.length >= umbralLecturas) {\n    const volumenAnterior = lecturas[lecturas.length - umbralLecturas].volumen;\n    const volumenActual = lecturas[lecturas.length - 1].volumen;\n    const deltaVolumen = volumenActual - volumenAnterior;\n\n    if (deltaVolumen >= umbralIncremento && estadoAnterior === 'Operación Normal') {\n        estadoActual = 'En Rellenado';\n        flow.set('inicioRellenado', Date.now());\n    } else if (deltaVolumen <= 0 && estadoAnterior === 'En Rellenado') {\n        estadoActual = 'Operación Normal';\n        flow.set('finRellenado', Date.now());\n    }\n}\n\nflow.set('estadoRellenado', estadoActual);\nmsg.payload = estadoActual;\nreturn msg;",
         "outputs": 1,
-        "timeout": 0,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1940,
-        "y": 2140,
+        "x": 2750,
+        "y": 2320,
         "wires": [
-            []
+            [
+                "50f05e58605974bb"
+            ]
         ]
     },
     {
-        "id": "3cd770d4dcead9a4",
+        "id": "50f05e58605974bb",
         "type": "function",
         "z": "cf449ce1322fd8eb",
-        "name": "formato_ui",
-        "func": "msg.payload = {\n    value: msg.payload,\n    label: msg.payload + \" Litros\"\n};\nreturn msg;",
+        "name": "Calcular Flujo",
+        "func": "const lecturas = flow.get(\"lecturasVolumen\");\nconst estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\nlet flujo = null;\n\nif (estadoRellenado === 'Operación Normal') {\n    if (lecturas.length >= 2) {\n        const volumenAnterior = lecturas[lecturas.length - 2].volumen;\n        const tiempoAnterior = lecturas[lecturas.length - 2].tiempo;\n        const volumenActual = lecturas[lecturas.length - 1].volumen;\n        const tiempoActual = lecturas[lecturas.length - 1].tiempo;\n\n        const deltaVolumen = volumenActual - volumenAnterior;\n        const deltaTiempo = (tiempoActual - tiempoAnterior) / 1000; // en segundos\n\n        flujo = -deltaVolumen / deltaTiempo; // Negativo porque el volumen disminuye\n\n        // Guardar el último flujo válido\n        flow.set('ultimoFlujoValido', flujo);\n    } else {\n        flujo = flow.get('ultimoFlujoValido') || 0;\n    }\n} else if (estadoRellenado === 'En Rellenado') {\n    // Usar el último flujo válido\n    flujo = flow.get('ultimoFlujoValido') || 0;\n}\n\nmsg.payload = {\n    flujo: flujo,\n    estado: estadoRellenado\n};\n\nreturn msg;",
         "outputs": 1,
-        "timeout": 0,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2960,
+        "y": 2320,
+        "wires": [
+            [
+                "e0e6929eae6eb323",
+                "d18de17a173e405b"
+            ]
+        ]
+    },
+    {
+        "id": "e0e6929eae6eb323",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Ver Flujo",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.flujo",
+        "targetType": "msg",
+        "x": 3120,
+        "y": 2280,
+        "wires": []
+    },
+    {
+        "id": "d18de17a173e405b",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Ver Estado",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.estado",
+        "targetType": "msg",
+        "x": 3120,
+        "y": 2320,
+        "wires": []
+    },
+    {
+        "id": "1e7408a44bb6c103",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Incrementar",
+        "func": "let value = context.get('value') || 4000;\n\nif (value <= 20000) {\n    node.send({ payload: value });\n    value++; \n    context.set('value', value);\n} else {\n    context.set('value', 4000);\n}\nreturn null;\n",
+        "outputs": 1,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 2090,
-        "y": 2140,
-        "wires": [
-            [
-                "1d81862aeac9e116"
-            ]
-        ]
-    },
-    {
-        "id": "1d81862aeac9e116",
-        "type": "ui-chart",
-        "z": "cf449ce1322fd8eb",
-        "group": "3f690bb5a526a246",
-        "name": "Vol FA-02 2",
-        "label": "Volumen FA-02 2",
-        "order": 2,
-        "chartType": "bar",
-        "category": "label",
-        "categoryType": "property",
-        "xAxisProperty": "",
-        "xAxisPropertyType": "msg",
-        "xAxisType": "category",
-        "yAxisProperty": "value",
-        "ymin": "0",
-        "ymax": "40000",
-        "action": "replace",
-        "pointShape": "circle",
-        "pointRadius": 4,
-        "showLegend": false,
-        "removeOlder": 1,
-        "removeOlderUnit": "3600",
-        "removeOlderPoints": "",
-        "colors": [
-            "#227dbf",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "width": "1",
-        "height": "5",
-        "className": "",
-        "x": 2250,
-        "y": 2140,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "fb25f7ae8df89b08",
-        "type": "link in",
-        "z": "cf449ce1322fd8eb",
-        "name": "link in 57",
-        "links": [],
-        "x": 715,
         "y": 2200,
         "wires": [
             [
-                "afb2dfa2e5c537eb"
+                "395f4213228f79e0",
+                "1f113caa7dcee4f9",
+                "316efee7c7e1cbce"
             ]
         ]
     },
     {
-        "id": "ad29b4a4a1553c29",
-        "type": "ui-gauge",
-        "z": "cf449ce1322fd8eb",
-        "d": true,
-        "name": "Flujo COPE 3",
-        "group": "3f690bb5a526a246",
-        "order": 4,
-        "width": "5",
-        "height": "4",
-        "gtype": "gauge-half",
-        "gstyle": "rounded",
-        "title": "Flujo COPE 3",
-        "units": "L/h",
-        "icon": "",
-        "prefix": "",
-        "suffix": "",
-        "segments": [
-            {
-                "from": "0",
-                "color": "#ea5353"
-            },
-            {
-                "from": "4000",
-                "color": "#5cd65c"
-            },
-            {
-                "from": "7500",
-                "color": "#ea5353"
-            }
-        ],
-        "min": 0,
-        "max": "10000",
-        "sizeThickness": "26",
-        "sizeGap": "3",
-        "sizeKeyThickness": "20",
-        "styleRounded": true,
-        "styleGlow": false,
-        "className": "",
-        "x": 2430,
-        "y": 2760,
-        "wires": []
-    },
-    {
-        "id": "66f01d635db2cc7d",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "update",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "update",
-        "payload": "",
-        "payloadType": "date",
-        "x": 460,
-        "y": 2560,
-        "wires": [
-            [
-                "e336fe06d8d98977"
-            ]
-        ]
-    },
-    {
-        "id": "215153a99d55df18",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "next",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "next",
-        "payload": "",
-        "payloadType": "date",
-        "x": 130,
-        "y": 2680,
-        "wires": [
-            [
-                "e336fe06d8d98977"
-            ]
-        ]
-    },
-    {
-        "id": "b834554e3a045c45",
-        "type": "change",
-        "z": "cf449ce1322fd8eb",
-        "name": "Advance queue",
-        "rules": [
-            {
-                "t": "set",
-                "p": "topic",
-                "pt": "msg",
-                "to": "next",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 750,
-        "y": 2560,
-        "wires": [
-            [
-                "e336fe06d8d98977"
-            ]
-        ]
-    },
-    {
-        "id": "e336fe06d8d98977",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Modbus Queue",
-        "func": "let resendifnoresposne = true; // resend the last message is no response is received\nlet resendinterval = 10; // resend last e message every x seconds\nlet online_threshold = 10; // Seconds between updates under which the device is considered online\nlet offline_threshold = 300; // Seconds between updates above which the device is considered offline\n\nlet notifmsg = null;\n\n// Check and make sure the incoming message has a topic\nif ((msg.topic===\"\")||(msg.topic===null)||(msg.topic===undefined)) {\n    node.status({fill:\"red\",shape:\"dot\",text:\"Topic missing\"});\n    return;\n}\n\nlet lastupdate = context.get(\"lastupdate\");\nlet state = context.get(\"state\") | 0;\nlet queue = context.get(\"queue\");\nlet queuecount = 0;\nif (queue === undefined) {\n    queue = [];\n} else {\n    if (Array.isArray(queue)) {\n        queuecount = queue.length;\n    } else {\n        queue = [];\n    }\n}\nlet current = new Date().getTime();\nlet send = false;\n\nswitch (msg.topic.toLowerCase()) {\n    case \"update\":\n        // Update the timer and statistics\n\n        if (lastupdate !== undefined) {\n            notifmsg = { \"topic\": \"Information\", \"payload\": {} };\n            current = current - lastupdate;\n            current = Math.floor(current / 1000);\n            notifmsg.payload.secondsincelastupdate = current;\n            var minute = Math.floor(current / 60);\n            var hour = Math.floor(minute / 60);\n            var day = Math.floor(hour / 24);\n            if (current > 24 * 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + day + \" days, \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60) {\n                notifmsg.payload.updatetext = \"Last update \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else {\n                notifmsg.payload.updatetext = \"Last update \" + current % 60 + \" seconds ago\";\n            }\n\n            // Resend last message if there is no response from the server\n            if (resendifnoresposne) {\n                if ((current>0) && (current % resendinterval===0)) {\n                    let lastmsg = context.get(\"lastmsg\");\n                    if ((lastmsg!==undefined) && (context.get(\"sent\"))) {\n                        notifmsg.payload.resend = true;\n                        if ((lastmsg.payload.fc === 1) || (lastmsg.payload.fc === 2) || (lastmsg.payload.fc === 3) || (lastmsg.payload.fc === 4)) {\n                            // this is a modbus read request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Read re-sent!\" });\n                            return [lastmsg, null, notifmsg];\n                        } else {\n                            // this is a modbus write request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Write re-sent!\" });\n                            return [null, lastmsg, notifmsg];\n                        }\n                    }\n                }\n            }\n\n            // Check for online state\n            if (state !== 1) {\n                if (current < online_threshold) {\n                    notifmsg.topic = \"Warning\";\n                    notifmsg.payload.text = \"Device is now online\";\n                    notifmsg.payload.statuschange = true;\n                    state = 1;\n                    context.set(\"state\", state);\n                }\n            } else {\n                if (current > offline_threshold) {\n                    notifmsg.topic = \"Error\";\n                    notifmsg.payload.text = \"Device is not transmitting\";\n                    notifmsg.payload.statuschange = true;\n                    state = 99;\n                    context.set(\"state\", state);\n                }\n            }\n            notifmsg.payload.state = state;\n            if (state===1) {\n                node.status({ fill: \"blue\", shape: \"ring\", text: queuecount+ \" | \"+notifmsg.payload.updatetext });\n            } else {\n                node.status({ fill: \"red\", shape: \"ring\", text: queuecount + \" | \" + notifmsg.payload.updatetext });\n            }\n            return [null, null, notifmsg];\n\n        } else {\n            node.status({ fill: \"grey\", shape: \"ring\", text: \"No data\" });\n        }\n        break;\n    case \"next\":\n        // Update the lastupdate counter\n        context.set(\"lastupdate\", current);\n        context.set(\"sent\", false);\n        send = true;\n        break;\n    case \"reset\":\n        context.set(\"queue\",[]);\n        context.set(\"sent\", false);\n        context.set(\"lastmsg\", undefined);\n        break;\n    default:\n        // The incoming message is a modbus request\n\n        // delete the last msg to prevent from being resent\n        // context.set(\"lastmsg\", undefined);\n\n        // Check if there is already a message in the queue with the same topic. \n        // If there is it needs to be deleted, because we only keep the last message.\n        for (let i=queue.length-1; i>=0; i--) {\n            if (queue[i].topic === msg.topic) {\n                queue.splice(i,1);\n            }\n        }\n\n        // Add the message to the end of the queue\n        queue.push(msg);\n        context.set(\"queue\",queue);\n\n        if (!context.get(\"sent\")) {\n            send = true;\n        }\n        node.status({ fill: \"green\", shape: \"dot\", text: queue.length });\n\n}\n\n// We need to send out a new message\nif (send) {\n\n    if (queue.length>0) {\n        // Get the older message from the array\n        let newmsg = queue[0];\n        // remove this message\n        queue.splice(0,1);\n        context.set(\"queue\",queue);\n        context.set(\"sent\", true);\n        context.set(\"lastmsg\", newmsg);\n\n        if ((newmsg.payload.fc === 1) || (newmsg.payload.fc === 2) || (newmsg.payload.fc === 3) || (newmsg.payload.fc === 4)) {\n            // this is a modbus read request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Read sent!\" });\n            return[newmsg,null,null];\n        } else {\n            // this is a modbus write request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Write sent!\" });\n            return [null, newmsg, null];\n        }\n        \n    }\n}\n",
-        "outputs": 3,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 750,
-        "y": 2680,
-        "wires": [
-            [
-                "ad54997a38c9dc8b"
-            ],
-            [],
-            [
-                "3cccbdcf5a9e9253"
-            ]
-        ],
-        "info": "# Modbus Queue\r\n\r\nThis node queueing read and write messages for modbus. Use this node if you are reading and writing the same device with many different requests. E.g. reading different coil/register intervals continously and also writing to the device at the same time.\r\n\r\nIt does a few things:\r\n- queues all messages arrive on the input port\r\n- based on the msg.topic, older messages of the same topci is ignored\r\n- sends out the oldest message and waits for the \r\n- monitors the time since last message and send out report on the output\r\n- handles online/offline status\r\n- resend the last message is response is not received in time\r\n\r\n## Input Data\r\n\r\n### payload\r\n\r\nThe payload should contain the data that gets sent to the flex-getter or flex-write node.\r\nTypical modbus read payload:\r\n`{\"value\":0,\"fc\":3,\"unitid\":1,\"address\":1000,\"quantity\":20}`\r\nTypical modbus write payload:\r\n`{\"value\":false,\"fc\":5,\"unitid\":1,\"address\":0,\"quantity\":1}`\r\n\r\n### topic\r\n\r\nEach message must contain a topic (any text), and this topic is used to identify the different read/write requests and delete any earlier request with the same topic if it still in the queueing\r\n\r\nThere are a few reserved topic for special function (for these payload is ignored):\r\n- reset: resets the queue and deleted any data collected so far\r\n- next: this is the message fed back from the flex getter/write node to indicate to this node that a new message can be sent out\r\n- update: this should be coming from a 1 second time to display the current queue count, time since the last update and online/offline status\r\n\r\n## Output ports\r\n\r\n### Port 1: flex getter\r\n\r\nThis output should be connected to a modbos-flex-getter and all the read requests will be sent out through this port\r\n\r\n### Port 2: flex write\r\n\r\nThis output should be connected to a modbos-flex-write and all the write requests will be sent out through this port\r\n\r\n### Port 3: status messages\r\n\r\nThis port outputs a status message for every update message (msg.topic=\"update\").\r\n\r\n- topic: \"Information\" for regular updates, \"Warning\": offline device is now back online, \"Error\": device is offline\r\n- payload.text: message like when the device gone offline, or back online\r\n- payload.updatetext: time passed since the last update (human readable format)\r\n- payload.secondsincelastupdate: number of seconds since the last update from the device\r\n- payload.statuschange: true if status is changed (gone offline, back online)\r\n- payload.state: 0: initial state, no data yet, 1: device online, 99: device offline\r\n\r\n## Node Settings\r\n\r\nChange the settings in the first 4 lines of the code to influence the behaviour. Explanation is in the code as comment."
-    },
-    {
-        "id": "56a50c1afe9c2ca2",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "reset",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "update",
-        "payload": "",
-        "payloadType": "date",
-        "x": 270,
-        "y": 2680,
-        "wires": [
-            [
-                "e336fe06d8d98977"
-            ]
-        ]
-    },
-    {
-        "id": "3cccbdcf5a9e9253",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "update log",
-        "func": "if (msg.topic === \"Information\") {\n    // Registrar mensajes de información\n    node.log(\"Información: \" + msg.payload.updatetext);\n} else if (msg.topic === \"Warning\") {\n    // Registrar mensajes de advertencia\n    node.warn(\"Advertencia: \" + msg.payload.text);\n} else if (msg.topic === \"Error\") {\n    // Registrar mensajes de error\n    node.error(\"Error: \" + msg.payload.text);\n}\n\n// Puedes agregar lógica adicional para procesar otros campos del mensaje de estado\n// Por ejemplo, puedes verificar el valor de msg.payload.state para realizar acciones específicas\n// según el estado del dispositivo (en línea, fuera de línea, etc.)\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 960,
-        "y": 2700,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "62849a10392cbba2",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 460,
-        "y": 2680,
-        "wires": [
-            [
-                "e336fe06d8d98977"
-            ]
-        ]
-    },
-    {
-        "id": "ad54997a38c9dc8b",
-        "type": "modbus-flex-getter",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1",
-        "showStatusActivities": false,
-        "showErrors": false,
-        "showWarnings": true,
-        "logIOActivities": false,
-        "server": "0274315f4b847684",
-        "useIOFile": false,
-        "ioFile": "",
-        "useIOForPayload": false,
-        "emptyMsgOnFail": false,
-        "keepMsgProperties": false,
-        "delayOnStart": false,
-        "startDelayTime": "",
-        "x": 970,
-        "y": 2640,
-        "wires": [
-            [
-                "b834554e3a045c45",
-                "a4401949977fed93",
-                "c44c17bf7d4e8209"
-            ],
-            []
-        ]
-    },
-    {
-        "id": "fc7813fd664956e1",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1_AI0",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "2",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "1",
-        "topic": "read_ADC1_AI0",
-        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":0,\"quantity\":1}",
-        "payloadType": "json",
-        "x": 440,
-        "y": 2600,
-        "wires": [
-            [
-                "e336fe06d8d98977"
-            ]
-        ]
-    },
-    {
-        "id": "e2dbbb2ff4599739",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1_AI1",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "2",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "1",
-        "topic": "read_ADC1_AI1",
-        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":1,\"quantity\":1}",
-        "payloadType": "json",
-        "x": 440,
-        "y": 2640,
-        "wires": [
-            [
-                "e336fe06d8d98977"
-            ]
-        ]
-    },
-    {
-        "id": "b378a6a649c5d213",
-        "type": "link in",
-        "z": "cf449ce1322fd8eb",
-        "name": "link in 58",
-        "links": [],
-        "x": 355,
-        "y": 2680,
-        "wires": [
-            [
-                "e336fe06d8d98977"
-            ]
-        ]
-    },
-    {
-        "id": "a4401949977fed93",
-        "type": "switch",
-        "z": "cf449ce1322fd8eb",
-        "name": "ADC_1 Registers",
-        "property": "topic",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "read_ADC1_AI0",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "read_ADC1_AI1",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "read_ADC1_AI2",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 3,
-        "x": 1010,
-        "y": 2540,
-        "wires": [
-            [],
-            [],
-            []
-        ]
-    },
-    {
-        "id": "68a64d5ae52ba853",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "calc_vol",
-        "func": "const valorCrudo = msg.payload[0];\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Mantener solo el valor numérico\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1400,
-        "y": 2580,
-        "wires": [
-            [
-                "ac7d617096ee967e",
-                "268458d15665823b"
-            ]
-        ]
-    },
-    {
-        "id": "ac7d617096ee967e",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "telemetria",
-        "func": "msg.payload = {\n  volumen: msg.payload\n};\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1540,
-        "y": 2580,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "268458d15665823b",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "formato_ui",
-        "func": "msg.payload = {\n    value: msg.payload,\n    label: msg.payload + \" Litros\"\n};\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1690,
-        "y": 2580,
-        "wires": [
-            [
-                "a5653adc3ae42679"
-            ]
-        ]
-    },
-    {
-        "id": "a5653adc3ae42679",
-        "type": "ui-chart",
-        "z": "cf449ce1322fd8eb",
-        "d": true,
-        "group": "3f690bb5a526a246",
-        "name": "Vol FA-02 3",
-        "label": "Volumen FA-02 3",
-        "order": 2,
-        "chartType": "bar",
-        "category": "label",
-        "categoryType": "property",
-        "xAxisProperty": "",
-        "xAxisPropertyType": "msg",
-        "xAxisType": "category",
-        "yAxisProperty": "value",
-        "ymin": "0",
-        "ymax": "40000",
-        "action": "replace",
-        "pointShape": "circle",
-        "pointRadius": 4,
-        "showLegend": false,
-        "removeOlder": 1,
-        "removeOlderUnit": "3600",
-        "removeOlderPoints": "",
-        "colors": [
-            "#227dbf",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "width": "1",
-        "height": "5",
-        "className": "",
-        "x": 1850,
-        "y": 2580,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "c44c17bf7d4e8209",
-        "type": "debug",
-        "z": "cf449ce1322fd8eb",
-        "name": "debug 94",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 800,
-        "y": 2780,
-        "wires": []
-    },
-    {
-        "id": "5a9ee6248151c6e7",
-        "type": "debug",
-        "z": "cf449ce1322fd8eb",
-        "name": "debug 95",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1670,
-        "y": 1500,
-        "wires": []
-    },
-    {
-        "id": "entrada_datos",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Entrada de Datos y Mantenimiento de Cola",
-        "func": "const COLA_LECTURAS_KEY = \"colaLecturas\";\nlet colaLecturas = flow.get(COLA_LECTURAS_KEY) || [];\n\nconst nuevaLectura = {\n    tiempo: Date.now(),\n    volumen: msg.payload\n};\n\ncolaLecturas.push(nuevaLectura);\n\n// Mantener solo los últimos 5 minutos de datos\nconst cincoMinutosAtras = Date.now() - 5 * 60 * 1000;\ncolaLecturas = colaLecturas.filter(lectura => lectura.tiempo >= cincoMinutosAtras);\n\nflow.set(COLA_LECTURAS_KEY, colaLecturas);\n\nreturn { payload: colaLecturas };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1410,
-        "y": 2680,
-        "wires": [
-            [
-                "deteccion_estado"
-            ]
-        ]
-    },
-    {
-        "id": "deteccion_estado",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Detección de Estado del Tanque",
-        "func": "const ESTADO_TANQUE_KEY = \"estadoTanque\";\nlet estadoAnterior = flow.get(ESTADO_TANQUE_KEY) || \"vaciando\";\n\nconst colaLecturas = msg.payload;\nif (colaLecturas.length < 2) return null;\n\nconst ultimaLectura = colaLecturas[colaLecturas.length - 1];\nconst penultimaLectura = colaLecturas[colaLecturas.length - 2];\n\nlet nuevoEstado;\nif (ultimaLectura.volumen > penultimaLectura.volumen + 70) {\n    nuevoEstado = \"rellenando\";\n} else if (ultimaLectura.volumen < penultimaLectura.volumen - 5) {\n    nuevoEstado = \"vaciando\";\n} else {\n    nuevoEstado = \"estable\";\n}\n\nflow.set(ESTADO_TANQUE_KEY, nuevoEstado);\n\nreturn { payload: { colaLecturas, estadoAnterior, nuevoEstado } };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1450,
-        "y": 2720,
-        "wires": [
-            [
-                "manejo_transiciones"
-            ]
-        ]
-    },
-    {
-        "id": "manejo_transiciones",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Manejo de Transiciones de Estado",
-        "func": "const { colaLecturas, estadoAnterior, nuevoEstado } = msg.payload;\nconst VALOR_FIJO_KEY = \"valorFijo\";\n\nfunction encontrarInicioAumento(cola) {\n    for (let i = cola.length - 1; i > 0; i--) {\n        if (cola[i].volumen <= cola[i-1].volumen) {\n            return i;\n        }\n    }\n    return 0;\n}\n\nfunction calcularPromedioFlujo(lecturas) {\n    if (lecturas.length < 2) return 0;\n    let sumaFlujo = 0;\n    for (let i = 1; i < lecturas.length; i++) {\n        const tiempoDiff = (lecturas[i].tiempo - lecturas[i-1].tiempo) / 1000;\n        const volumenDiff = lecturas[i-1].volumen - lecturas[i].volumen;\n        if (tiempoDiff > 0) {\n            sumaFlujo += (volumenDiff / tiempoDiff) * 3600;\n        }\n    }\n    return sumaFlujo / (lecturas.length - 1);\n}\n\nif (nuevoEstado === \"rellenando\" && estadoAnterior !== \"rellenando\") {\n    const inicioAumento = encontrarInicioAumento(colaLecturas);\n    const promedioFlujo = calcularPromedioFlujo(colaLecturas.slice(0, inicioAumento));\n    flow.set(VALOR_FIJO_KEY, promedioFlujo);\n    colaLecturas.splice(0, inicioAumento);\n} else if (nuevoEstado === \"vaciando\" && estadoAnterior === \"rellenando\") {\n    colaLecturas.splice(0, colaLecturas.length - 1);\n    flow.set(VALOR_FIJO_KEY, null);\n}\n\nreturn { payload: { colaLecturas, estado: nuevoEstado } };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1440,
-        "y": 2760,
-        "wires": [
-            [
-                "calculo_flujo"
-            ]
-        ]
-    },
-    {
-        "id": "calculo_flujo",
-        "type": "switch",
-        "z": "cf449ce1322fd8eb",
-        "name": "Estado del Tanque",
-        "property": "payload.estado",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "vaciando",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "rellenando",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "estable",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 3,
-        "x": 1690,
-        "y": 2760,
-        "wires": [
-            [
-                "calculo_vaciando"
-            ],
-            [
-                "calculo_rellenando"
-            ],
-            [
-                "calculo_estable"
-            ]
-        ]
-    },
-    {
-        "id": "calculo_vaciando",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Cálculo Flujo (Vaciando)",
-        "func": "const colaLecturas = msg.payload.colaLecturas;\nif (colaLecturas.length < 2) return { payload: 0 };\n\nconst primeraLectura = colaLecturas[0];\nconst ultimaLectura = colaLecturas[colaLecturas.length - 1];\n\nconst tiempoTranscurrido = (ultimaLectura.tiempo - primeraLectura.tiempo) / 1000;\nconst cambioVolumen = primeraLectura.volumen - ultimaLectura.volumen;\n\nif (tiempoTranscurrido > 0) {\n    const flujo = (cambioVolumen / tiempoTranscurrido) * 3600;\n    return { payload: Math.round(flujo) };\n}\n\nreturn { payload: 0 };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1940,
-        "y": 2720,
-        "wires": [
-            [
-                "salida_datos"
-            ]
-        ]
-    },
-    {
-        "id": "calculo_rellenando",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Cálculo Flujo (Rellenando)",
-        "func": "const valorFijo = flow.get(\"valorFijo\");\nreturn { payload: valorFijo };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1950,
-        "y": 2760,
-        "wires": [
-            [
-                "salida_datos"
-            ]
-        ]
-    },
-    {
-        "id": "calculo_estable",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Cálculo Flujo (Estable)",
-        "func": "const colaLecturas = msg.payload.colaLecturas;\nif (colaLecturas.length < 2) return { payload: 0 };\n\nconst primeraLectura = colaLecturas[0];\nconst ultimaLectura = colaLecturas[colaLecturas.length - 1];\n\nconst tiempoTranscurrido = (ultimaLectura.tiempo - primeraLectura.tiempo) / 1000;\nconst cambioVolumen = primeraLectura.volumen - ultimaLectura.volumen;\n\nif (tiempoTranscurrido > 0) {\n    const flujo = (cambioVolumen / tiempoTranscurrido) * 3600;\n    return { payload: Math.round(flujo) };\n}\n\nreturn { payload: 0 };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1940,
-        "y": 2800,
-        "wires": [
-            [
-                "salida_datos"
-            ]
-        ]
-    },
-    {
-        "id": "salida_datos",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Salida de Datos",
-        "func": "return { payload: msg.payload, topic: msg.payload.estado };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2240,
-        "y": 2760,
-        "wires": [
-            [
-                "ad29b4a4a1553c29"
-            ]
-        ]
-    },
-    {
-        "id": "simulador_disminucion",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Simulador Disminución",
-        "func": "const RANGO_MIN = 4000;\nconst RANGO_MAX = 20000;\nconst CAPACIDAD_TOTAL = 40000; // Litros\nconst TASA_VACIADO = 5000; // Litros por hora\n\nlet nivelActual = context.get('nivelActual') || CAPACIDAD_TOTAL;\nlet ultimaActualizacion = context.get('ultimaActualizacion') || Date.now();\n\nfunction actualizarNivel() {\n    const ahora = Date.now();\n    const tiempoTranscurrido = (ahora - ultimaActualizacion) / 3600000; // Convertir a horas\n    \n    // Calcular el nuevo nivel\n    const cambioNivel = TASA_VACIADO * tiempoTranscurrido;\n    nivelActual -= cambioNivel;\n    \n    // Asegurar que el nivel esté dentro del rango\n    if (nivelActual < 0) {\n        nivelActual = 0;\n    }\n    \n    // Convertir el nivel actual a la escala de 4000-20000\n    const nivelEscalado = RANGO_MIN + (nivelActual / CAPACIDAD_TOTAL) * (RANGO_MAX - RANGO_MIN);\n    \n    // Guardar el estado actual\n    context.set('nivelActual', nivelActual);\n    context.set('ultimaActualizacion', ahora);\n    \n    return Math.round(nivelEscalado);\n}\n\nreturn { payload: actualizarNivel() };",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1120,
-        "y": 2900,
-        "wires": [
-            [
-                "68a64d5ae52ba853",
-                "entrada_datos"
-            ]
-        ]
-    },
-    {
-        "id": "simulador_aumento",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Simulador Aumento",
-        "func": "const RANGO_MIN = 4000;\nconst RANGO_MAX = 20000;\nconst CAPACIDAD_TOTAL = 40000; // Litros\nconst TASA_LLENADO = 10000; // Litros por hora\n\nlet nivelActual = context.get('nivelActual') || 0;\nlet ultimaActualizacion = context.get('ultimaActualizacion') || Date.now();\n\nfunction actualizarNivel() {\n    const ahora = Date.now();\n    const tiempoTranscurrido = (ahora - ultimaActualizacion) / 3600000; // Convertir a horas\n    \n    // Calcular el nuevo nivel\n    const cambioNivel = TASA_LLENADO * tiempoTranscurrido;\n    nivelActual += cambioNivel;\n    \n    // Asegurar que el nivel esté dentro del rango\n    if (nivelActual > CAPACIDAD_TOTAL) {\n        nivelActual = CAPACIDAD_TOTAL;\n    }\n    \n    // Convertir el nivel actual a la escala de 4000-20000\n    const nivelEscalado = RANGO_MIN + (nivelActual / CAPACIDAD_TOTAL) * (RANGO_MAX - RANGO_MIN);\n    \n    // Guardar el estado actual\n    context.set('nivelActual', nivelActual);\n    context.set('ultimaActualizacion', ahora);\n    \n    return Math.round(nivelEscalado);\n}\n\nreturn { payload: actualizarNivel() };",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1120,
-        "y": 2960,
-        "wires": [
-            [
-                "entrada_datos",
-                "68a64d5ae52ba853"
-            ]
-        ]
-    },
-    {
-        "id": "inject_disminucion",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "Activar Disminución",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "disminucion",
-        "payload": "",
-        "payloadType": "date",
-        "x": 890,
-        "y": 2900,
-        "wires": [
-            [
-                "simulador_disminucion"
-            ]
-        ]
-    },
-    {
-        "id": "inject_aumento",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "Activar Aumento",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "aumento",
-        "payload": "",
-        "payloadType": "date",
-        "x": 880,
-        "y": 2960,
-        "wires": [
-            [
-                "simulador_aumento"
-            ]
-        ]
-    },
-    {
-        "id": "73690ee78e4ad6bb",
-        "type": "ui-gauge",
-        "z": "cf449ce1322fd8eb",
-        "name": "Flujo COPE 3",
-        "group": "3f690bb5a526a246",
-        "order": 4,
-        "width": "5",
-        "height": "4",
-        "gtype": "gauge-half",
-        "gstyle": "rounded",
-        "title": "Flujo COPE 3",
-        "units": "L/h",
-        "icon": "",
-        "prefix": "",
-        "suffix": "",
-        "segments": [
-            {
-                "from": "0",
-                "color": "#ea5353"
-            },
-            {
-                "from": "4000",
-                "color": "#5cd65c"
-            },
-            {
-                "from": "7500",
-                "color": "#ea5353"
-            }
-        ],
-        "min": 0,
-        "max": "10000",
-        "sizeThickness": "26",
-        "sizeGap": "3",
-        "sizeKeyThickness": "20",
-        "styleRounded": true,
-        "styleGlow": false,
-        "className": "",
-        "x": 2200,
-        "y": 3260,
-        "wires": []
-    },
-    {
-        "id": "a4bccd1a92c3b232",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "calc_vol",
-        "func": "function calcVol(msg) {\n    const valorCrudo = msg.payload;\n    const valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\n    msg.payload = Math.round(valorLitros);\n    return msg;\n}\n\nreturn calcVol(msg);",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1170,
-        "y": 3080,
-        "wires": [
-            [
-                "3430d7763c4a63f9",
-                "22f0a18363dccaca"
-            ]
-        ]
-    },
-    {
-        "id": "3430d7763c4a63f9",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "telemetria",
-        "func": "msg.payload = {\n  volumen: msg.payload\n};\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1310,
-        "y": 3080,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "22f0a18363dccaca",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "formato_ui",
-        "func": "msg.payload = {\n    value: msg.payload,\n    label: msg.payload + \" Litros\"\n};\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1460,
-        "y": 3080,
-        "wires": [
-            [
-                "a755b7953d7e4f60"
-            ]
-        ]
-    },
-    {
-        "id": "a755b7953d7e4f60",
-        "type": "ui-chart",
-        "z": "cf449ce1322fd8eb",
-        "group": "3f690bb5a526a246",
-        "name": "Vol FA-02 3",
-        "label": "Volumen FA-02 3",
-        "order": 2,
-        "chartType": "bar",
-        "category": "label",
-        "categoryType": "property",
-        "xAxisProperty": "",
-        "xAxisPropertyType": "msg",
-        "xAxisType": "category",
-        "yAxisProperty": "value",
-        "ymin": "0",
-        "ymax": "40000",
-        "action": "replace",
-        "pointShape": "circle",
-        "pointRadius": 4,
-        "showLegend": false,
-        "removeOlder": 1,
-        "removeOlderUnit": "3600",
-        "removeOlderPoints": "",
-        "colors": [
-            "#227dbf",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "width": "1",
-        "height": "5",
-        "className": "",
-        "x": 1620,
-        "y": 3080,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "d391af7a80639194",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Entrada de Datos y Mantenimiento de Cola",
-        "func": "const COLA_LECTURAS_KEY = \"colaLecturas\";\nlet colaLecturas = flow.get(COLA_LECTURAS_KEY) || [];\n\nconst nuevaLectura = {\n    tiempo: Date.now(),\n    volumen: msg.payload\n};\n\ncolaLecturas.push(nuevaLectura);\n\n// Mantener solo los últimos 5 minutos de datos\nconst cincoMinutosAtras = Date.now() - 5 * 60 * 1000;\ncolaLecturas = colaLecturas.filter(lectura => lectura.tiempo >= cincoMinutosAtras);\n\nflow.set(COLA_LECTURAS_KEY, colaLecturas);\n\nreturn { payload: colaLecturas };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1180,
-        "y": 3180,
-        "wires": [
-            [
-                "991bcba062926eee"
-            ]
-        ]
-    },
-    {
-        "id": "991bcba062926eee",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Detección de Estado del Tanque",
-        "func": "const ESTADO_TANQUE_KEY = \"estadoTanque\";\nlet estadoAnterior = flow.get(ESTADO_TANQUE_KEY) || \"vaciando\";\n\nconst colaLecturas = msg.payload;\nif (colaLecturas.length < 2) return null;\n\nconst ultimaLectura = colaLecturas[colaLecturas.length - 1];\nconst penultimaLectura = colaLecturas[colaLecturas.length - 2];\n\nlet nuevoEstado;\nif (ultimaLectura.volumen > penultimaLectura.volumen + 70) {\n    nuevoEstado = \"rellenando\";\n} else if (ultimaLectura.volumen < penultimaLectura.volumen - 5) {\n    nuevoEstado = \"vaciando\";\n} else {\n    nuevoEstado = \"estable\";\n}\n\nflow.set(ESTADO_TANQUE_KEY, nuevoEstado);\n\nreturn { payload: { colaLecturas, estadoAnterior, nuevoEstado } };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1220,
-        "y": 3220,
-        "wires": [
-            [
-                "711863b88c8911fa"
-            ]
-        ]
-    },
-    {
-        "id": "711863b88c8911fa",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Manejo de Transiciones de Estado",
-        "func": "const { colaLecturas, estadoAnterior, nuevoEstado } = msg.payload;\nconst VALOR_FIJO_KEY = \"valorFijo\";\n\nfunction encontrarInicioAumento(cola) {\n    for (let i = cola.length - 1; i > 0; i--) {\n        if (cola[i].volumen <= cola[i-1].volumen) {\n            return i;\n        }\n    }\n    return 0;\n}\n\nfunction calcularPromedioFlujo(lecturas) {\n    if (lecturas.length < 2) return 0;\n    let sumaFlujo = 0;\n    for (let i = 1; i < lecturas.length; i++) {\n        const tiempoDiff = (lecturas[i].tiempo - lecturas[i-1].tiempo) / 1000;\n        const volumenDiff = lecturas[i-1].volumen - lecturas[i].volumen;\n        if (tiempoDiff > 0) {\n            sumaFlujo += (volumenDiff / tiempoDiff) * 3600;\n        }\n    }\n    return sumaFlujo / (lecturas.length - 1);\n}\n\nif (nuevoEstado === \"rellenando\" && estadoAnterior !== \"rellenando\") {\n    const inicioAumento = encontrarInicioAumento(colaLecturas);\n    const promedioFlujo = calcularPromedioFlujo(colaLecturas.slice(0, inicioAumento));\n    flow.set(VALOR_FIJO_KEY, promedioFlujo);\n    colaLecturas.splice(0, inicioAumento);\n} else if (nuevoEstado === \"vaciando\" && estadoAnterior === \"rellenando\") {\n    colaLecturas.splice(0, colaLecturas.length - 1);\n    flow.set(VALOR_FIJO_KEY, null);\n}\n\nreturn { payload: { colaLecturas, estado: nuevoEstado } };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1210,
-        "y": 3260,
-        "wires": [
-            [
-                "10cd24204b062f61"
-            ]
-        ]
-    },
-    {
-        "id": "10cd24204b062f61",
-        "type": "switch",
-        "z": "cf449ce1322fd8eb",
-        "name": "Estado del Tanque",
-        "property": "payload.estado",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "vaciando",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "rellenando",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "estable",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 3,
-        "x": 1460,
-        "y": 3260,
-        "wires": [
-            [
-                "e2642683a41f381a"
-            ],
-            [
-                "3e7bac5de060f0c3"
-            ],
-            [
-                "4c14b3f97d870b01"
-            ]
-        ]
-    },
-    {
-        "id": "e2642683a41f381a",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Cálculo Flujo (Vaciando)",
-        "func": "const colaLecturas = msg.payload.colaLecturas;\nif (colaLecturas.length < 2) return { payload: 0 };\n\nconst primeraLectura = colaLecturas[0];\nconst ultimaLectura = colaLecturas[colaLecturas.length - 1];\n\nconst tiempoTranscurrido = (ultimaLectura.tiempo - primeraLectura.tiempo) / 1000;\nconst cambioVolumen = primeraLectura.volumen - ultimaLectura.volumen;\n\nif (tiempoTranscurrido > 0) {\n    const flujo = (cambioVolumen / tiempoTranscurrido) * 3600;\n    return { payload: Math.round(flujo) };\n}\n\nreturn { payload: 0 };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1710,
-        "y": 3220,
-        "wires": [
-            [
-                "968f6c1cc49b7e31"
-            ]
-        ]
-    },
-    {
-        "id": "3e7bac5de060f0c3",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Cálculo Flujo (Rellenando)",
-        "func": "const valorFijo = flow.get(\"valorFijo\");\nreturn { payload: valorFijo };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1720,
-        "y": 3260,
-        "wires": [
-            [
-                "968f6c1cc49b7e31"
-            ]
-        ]
-    },
-    {
-        "id": "4c14b3f97d870b01",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Cálculo Flujo (Estable)",
-        "func": "const colaLecturas = msg.payload.colaLecturas;\nif (colaLecturas.length < 2) return { payload: 0 };\n\nconst primeraLectura = colaLecturas[0];\nconst ultimaLectura = colaLecturas[colaLecturas.length - 1];\n\nconst tiempoTranscurrido = (ultimaLectura.tiempo - primeraLectura.tiempo) / 1000;\nconst cambioVolumen = primeraLectura.volumen - ultimaLectura.volumen;\n\nif (tiempoTranscurrido > 0) {\n    const flujo = (cambioVolumen / tiempoTranscurrido) * 3600;\n    return { payload: Math.round(flujo) };\n}\n\nreturn { payload: 0 };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1710,
-        "y": 3300,
-        "wires": [
-            [
-                "968f6c1cc49b7e31"
-            ]
-        ]
-    },
-    {
-        "id": "968f6c1cc49b7e31",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Salida de Datos",
-        "func": "return { payload: msg.payload, topic: msg.payload.estado };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2010,
-        "y": 3260,
-        "wires": [
-            [
-                "73690ee78e4ad6bb"
-            ]
-        ]
-    },
-    {
-        "id": "3bf9115fd8d86284",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Simulador Disminución",
-        "func": "const RANGO_MIN = 4000;\nconst RANGO_MAX = 20000;\nconst CAPACIDAD_TOTAL = 40000; // Litros\nconst TASA_VACIADO = 5000; // Litros por hora\n\nlet nivelActual = context.get('nivelActual') || CAPACIDAD_TOTAL;\nlet ultimaActualizacion = context.get('ultimaActualizacion') || Date.now();\n\nfunction actualizarNivel() {\n    const ahora = Date.now();\n    const tiempoTranscurrido = (ahora - ultimaActualizacion) / 3600000; // Convertir a horas\n    \n    // Calcular el nuevo nivel\n    const cambioNivel = TASA_VACIADO * tiempoTranscurrido;\n    nivelActual -= cambioNivel;\n    \n    // Asegurar que el nivel esté dentro del rango\n    if (nivelActual < 0) {\n        nivelActual = 0;\n    }\n    \n    // Convertir el nivel actual a la escala de 4000-20000\n    const nivelEscalado = RANGO_MIN + (nivelActual / CAPACIDAD_TOTAL) * (RANGO_MAX - RANGO_MIN);\n    \n    // Guardar el estado actual\n    context.set('nivelActual', nivelActual);\n    context.set('ultimaActualizacion', ahora);\n    \n    return Math.round(nivelEscalado);\n}\n\nreturn { payload: actualizarNivel() };",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 890,
-        "y": 3400,
-        "wires": [
-            [
-                "a4bccd1a92c3b232",
-                "d391af7a80639194"
-            ]
-        ]
-    },
-    {
-        "id": "b2f2f7ab0ff1b556",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Simulador Aumento",
-        "func": "const RANGO_MIN = 4000;\nconst RANGO_MAX = 20000;\nconst CAPACIDAD_TOTAL = 40000; // Litros\nconst TASA_LLENADO = 10000; // Litros por hora\n\nlet nivelActual = context.get('nivelActual') || 0;\nlet ultimaActualizacion = context.get('ultimaActualizacion') || Date.now();\n\nfunction actualizarNivel() {\n    const ahora = Date.now();\n    const tiempoTranscurrido = (ahora - ultimaActualizacion) / 3600000; // Convertir a horas\n    \n    // Calcular el nuevo nivel\n    const cambioNivel = TASA_LLENADO * tiempoTranscurrido;\n    nivelActual += cambioNivel;\n    \n    // Asegurar que el nivel esté dentro del rango\n    if (nivelActual > CAPACIDAD_TOTAL) {\n        nivelActual = CAPACIDAD_TOTAL;\n    }\n    \n    // Convertir el nivel actual a la escala de 4000-20000\n    const nivelEscalado = RANGO_MIN + (nivelActual / CAPACIDAD_TOTAL) * (RANGO_MAX - RANGO_MIN);\n    \n    // Guardar el estado actual\n    context.set('nivelActual', nivelActual);\n    context.set('ultimaActualizacion', ahora);\n    \n    return Math.round(nivelEscalado);\n}\n\nreturn { payload: actualizarNivel() };",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 890,
-        "y": 3460,
-        "wires": [
-            [
-                "d391af7a80639194",
-                "a4bccd1a92c3b232"
-            ]
-        ]
-    },
-    {
-        "id": "6d89a6a70b156ac0",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "Activar Disminución",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "disminucion",
-        "payload": "",
-        "payloadType": "date",
-        "x": 660,
-        "y": 3400,
-        "wires": [
-            [
-                "3bf9115fd8d86284"
-            ]
-        ]
-    },
-    {
-        "id": "ed3a7d341062229f",
-        "type": "inject",
-        "z": "cf449ce1322fd8eb",
-        "name": "Activar Aumento",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "aumento",
-        "payload": "",
-        "payloadType": "date",
-        "x": 650,
-        "y": 3460,
-        "wires": [
-            [
-                "b2f2f7ab0ff1b556"
-            ]
-        ]
-    },
-    {
-        "id": "procesamiento_volumen",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Procesamiento Unificado",
-        "func": "const COLA_LECTURAS_KEY = \"colaLecturas\";\nconst ESTADO_TANQUE_KEY = \"estadoTanque\";\nconst ULTIMO_VOLUMEN_KEY = \"ultimoVolumen\";\nconst VALOR_FIJO_KEY = \"valorFijo\";\n\nfunction detectarCambioVolumen(ultimoVolumen, nuevoVolumen) {\n    if (nuevoVolumen > ultimoVolumen + 70) return \"rellenando\";\n    if (nuevoVolumen < ultimoVolumen - 5) return \"vaciando\";\n    return \"estable\";\n}\n\nfunction calcularFlujo(cola) {\n    if (cola.length < 2) return 0;\n\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0 && volumenInicial > volumenFinal) {\n        return Math.round(((volumenInicial - volumenFinal) / tiempoDiferencia) * 3600);\n    }\n    return 0;\n}\n\nlet colaLecturas = flow.get(COLA_LECTURAS_KEY) || [];\nlet estadoTanque = flow.get(ESTADO_TANQUE_KEY) || \"vaciando\";\nlet ultimoVolumen = flow.get(ULTIMO_VOLUMEN_KEY) || msg.payload;\nlet valorFijo = flow.get(VALOR_FIJO_KEY) || 0;\n\nconst nuevaLectura = {\n    tiempo: Date.now(),\n    volumen: msg.payload\n};\n\nconst nuevoEstado = detectarCambioVolumen(ultimoVolumen, nuevaLectura.volumen);\n\nif (nuevoEstado === \"rellenando\" && estadoTanque !== \"rellenando\") {\n    valorFijo = calcularFlujo(colaLecturas);\n    flow.set(VALOR_FIJO_KEY, valorFijo);\n    colaLecturas = [];\n} else if (nuevoEstado === \"vaciando\" && estadoTanque === \"rellenando\") {\n    colaLecturas = [];\n    valorFijo = 0;\n    flow.set(VALOR_FIJO_KEY, valorFijo);\n}\n\nestadoTanque = nuevoEstado;\nflow.set(ESTADO_TANQUE_KEY, estadoTanque);\n\nif (estadoTanque !== \"rellenando\") {\n    colaLecturas.push(nuevaLectura);\n    if (colaLecturas.length > 60) { // Mantener máximo 5 minutos de datos (asumiendo una lectura por segundo)\n        colaLecturas.shift();\n    }\n}\n\nflow.set(COLA_LECTURAS_KEY, colaLecturas);\nflow.set(ULTIMO_VOLUMEN_KEY, nuevaLectura.volumen);\n\nlet flujo = estadoTanque === \"rellenando\" ? valorFijo : calcularFlujo(colaLecturas);\n\nreturn { payload: flujo, estadoTanque: estadoTanque };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1970,
-        "y": 200,
-        "wires": [
-            [
-                "limitador_tasa"
-            ]
-        ]
-    },
-    {
-        "id": "limitador_tasa",
+        "id": "395f4213228f79e0",
         "type": "delay",
         "z": "cf449ce1322fd8eb",
-        "name": "Rate Limit",
+        "name": "Retardo 1 segundo",
         "pauseType": "rate",
         "timeout": "5",
         "timeoutUnits": "seconds",
         "rate": "1",
-        "nbRateUnits": "5",
+        "nbRateUnits": "2",
         "rateUnits": "second",
         "randomFirst": "1",
         "randomLast": "5",
         "randomUnits": "seconds",
-        "drop": true,
+        "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 2210,
-        "y": 200,
+        "x": 2290,
+        "y": 2200,
         "wires": [
             [
-                "gauge_flujo"
+                "1e7408a44bb6c103"
             ]
         ]
     },
     {
-        "id": "gauge_flujo",
-        "type": "ui_gauge",
-        "z": "cf449ce1322fd8eb",
-        "name": "Flujo COPE",
-        "group": "panel_principal",
-        "order": 0,
-        "width": 0,
-        "height": 0,
-        "gtype": "gage",
-        "title": "Flujo COPE",
-        "label": "L/h",
-        "format": "{{value}}",
-        "min": 0,
-        "max": "10000",
-        "colors": [
-            "#00b500",
-            "#e6e600",
-            "#ca3838"
-        ],
-        "seg1": "",
-        "seg2": "",
-        "x": 2450,
-        "y": 200,
-        "wires": []
-    },
-    {
-        "id": "entrada_volumen",
+        "id": "ffe6fe9d862e8480",
         "type": "inject",
         "z": "cf449ce1322fd8eb",
-        "name": "Simulación de entrada de volumen",
+        "name": "Iniciar",
         "props": [
             {
                 "p": "payload"
             }
         ],
-        "repeat": "1",
+        "repeat": "",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
-        "payloadType": "num",
-        "x": 1670,
-        "y": 200,
+        "payloadType": "date",
+        "x": 1930,
+        "y": 2200,
         "wires": [
             [
-                "procesamiento_volumen"
+                "1e7408a44bb6c103"
             ]
         ]
     },
     {
-        "id": "e5c207b65b6d9a0a",
+        "id": "1f113caa7dcee4f9",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Ver en consola",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 2300,
+        "y": 2260,
+        "wires": []
+    },
+    {
+        "id": "316efee7c7e1cbce",
         "type": "function",
         "z": "cf449ce1322fd8eb",
-        "name": "State Detection",
-        "func": "// Obtener las últimas lecturas de volumen del contexto\nlet lecturasVolumen = flow.get(\"lecturasVolumen\") || [];\n\n// Añadir la nueva lectura\nlecturasVolumen.push(msg.payload.volumen);\n\n// Mantener solo las últimas 10 lecturas\nif (lecturasVolumen.length > 10) {\n    lecturasVolumen.shift();\n}\n\n// Guardar las lecturas actualizadas en el contexto\nflow.set(\"lecturasVolumen\", lecturasVolumen);\n\n// Inicializar contadores\nlet aumentos = 0;\nlet disminuciones = 0;\nlet estables = 0;\n\n// Analizar las lecturas para detectar el estado\nfor (let i = 1; i < lecturasVolumen.length; i++) {\n    let diferencia = lecturasVolumen[i] - lecturasVolumen[i - 1];\n    if (diferencia > 0) {\n        aumentos++;\n        disminuciones = 0;\n        estables = 0;\n    } else if (diferencia < 0) {\n        disminuciones++;\n        aumentos = 0;\n        estables = 0;\n    } else {\n        estables++;\n        aumentos = 0;\n        disminuciones = 0;\n    }\n}\n\n// Determinar el estado\nlet estado = flow.get(\"estado\") || \"Desconocido\";\n\nif (aumentos >= 4) {\n    estado = \"Relleno\";\n} else if (disminuciones >= 4) {\n    estado = \"Alimentación\";\n} else if (estables >= 10 && Math.abs(lecturasVolumen[lecturasVolumen.length - 1] - lecturasVolumen[lecturasVolumen.length - 2]) <= 20) {\n    estado = \"Estable\";\n}\n\n// Guardar el estado en el contexto\nflow.set(\"estado\", estado);\n\n// Añadir el estado al mensaje\nmsg.estado = estado;\n\n// Pasar el mensaje al siguiente nodo\nreturn msg;\n",
+        "name": "Data Accumulation Node",
+        "func": "let lecturas = flow.get(\"lecturasVolumen\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual\nconst registro = {\n    tiempo: Date.now(),\n    volumen: msg.payload // Usar msg.payload directamente\n};\nlecturas.push(registro);\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nconst tiempoActual = Date.now();\nlecturas = lecturas.filter(r => (tiempoActual - r.tiempo) <= tiempoMaximo);\n\n// Guardar las lecturas actualizadas en el contexto del flujo\nflow.set(\"lecturasVolumen\", lecturas);\n\n// Pasar las lecturas completas al siguiente nodo para su procesamiento\nreturn { payload: lecturas };",
         "outputs": 1,
-        "timeout": 0,
+        "timeout": "",
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1840,
-        "y": 500,
+        "x": 2430,
+        "y": 2940,
+        "wires": [
+            [
+                "ddff9f1fbcfdd1d8"
+            ]
+        ]
+    },
+    {
+        "id": "ddff9f1fbcfdd1d8",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Detectar Rellenado",
+        "func": "const lecturas = msg.payload;\nconst estadoAnterior = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoActual = estadoAnterior;\n\nconst umbralIncremento = 3; // Ajustar según necesidad\nconst umbralLecturas = 5;   // Número de lecturas a considerar\n\nif (lecturas.length >= umbralLecturas) {\n    const volumenAnterior = lecturas[lecturas.length - umbralLecturas].volumen;\n    const volumenActual = lecturas[lecturas.length - 1].volumen;\n    const deltaVolumen = volumenActual - volumenAnterior;\n\n    if (deltaVolumen >= umbralIncremento && estadoAnterior === 'Operación Normal') {\n        estadoActual = 'En Rellenado';\n        flow.set('inicioRellenado', Date.now());\n    } else if (deltaVolumen <= -umbralIncremento && estadoAnterior === 'En Rellenado') {\n        estadoActual = 'Operación Normal';\n        flow.set('finRellenado', Date.now());\n    }\n}\n\nflow.set('estadoRellenado', estadoActual);\nmsg.payload = estadoActual;\n\n// Actualizar el estado anterior para la próxima iteración\nflow.set('estadoAnterior', estadoActual);\n\nreturn msg;",
+        "outputs": 1,
+        "x": 2690,
+        "y": 2940,
+        "wires": [
+            [
+                "5ce82d5b2a5001b5",
+                "d1f8549f846a27b6"
+            ]
+        ]
+    },
+    {
+        "id": "5ce82d5b2a5001b5",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Filtrar Lecturas No Válidas",
+        "func": "let estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoAnterior = flow.get('estadoAnterior') || 'Operación Normal';\n\nif (estadoAnterior === 'En Rellenado' && estadoRellenado === 'Operación Normal') {\n    // El estado cambió de 'En Rellenado' a 'Operación Normal'\n    let lecturas = flow.get('lecturasVolumen') || [];\n    let inicioRellenado = flow.get('inicioRellenado') || Date.now();\n\n    // Eliminar lecturas durante 'En Rellenado'\n    lecturas = lecturas.filter(registro => registro.tiempo < inicioRellenado);\n\n    flow.set('lecturasVolumen', lecturas);\n}\n\n// Actualizar el estado anterior\nflow.set('estadoAnterior', estadoRellenado);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2980,
+        "y": 2900,
         "wires": [
             []
         ]
+    },
+    {
+        "id": "d1f8549f846a27b6",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Calcular Flujo",
+        "func": "const lecturas = flow.get(\"lecturasVolumen\") || [];\nconst estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\n\n// Obtener el último flujo válido almacenado\nlet ultimoFlujoValido = flow.get('ultimoFlujoValido');\n\n// Variable para el flujo actual\nlet flujo = ultimoFlujoValido || 0; // Usar el último flujo válido por defecto\n\n// Verificar el estado actual\nif (estadoRellenado === 'Operación Normal') {\n    if (lecturas.length >= 2) {\n        const volumenAnterior = lecturas[lecturas.length - 2].volumen;\n        const tiempoAnterior = lecturas[lecturas.length - 2].tiempo;\n        const volumenActual = lecturas[lecturas.length - 1].volumen;\n        const tiempoActual = lecturas[lecturas.length - 1].tiempo;\n\n        const deltaVolumen = volumenActual - volumenAnterior;\n        const deltaTiempo = (tiempoActual - tiempoAnterior) / 1000; // en segundos\n\n        if (deltaVolumen <= 0) {\n            // Volumen está disminuyendo, calcular flujo\n            flujo = -deltaVolumen / deltaTiempo; // flujo positivo\n\n            // Actualizar el último flujo válido\n            ultimoFlujoValido = flujo;\n            flow.set('ultimoFlujoValido', ultimoFlujoValido);\n        } else {\n            // Volumen está aumentando, no actualizar flujo ni ultimoFlujoValido\n            flujo = ultimoFlujoValido;\n        }\n    } else {\n        // Si no hay suficientes lecturas, mantener el último flujo válido\n        flujo = ultimoFlujoValido;\n    }\n} else if (estadoRellenado === 'En Rellenado') {\n    // Durante 'En Rellenado', no actualizar 'ultimoFlujoValido' ni recalcular 'flujo'\n    flujo = ultimoFlujoValido;\n}\n\n// Preparar el mensaje de salida\nmsg.payload = {\n    flujo: flujo,\n    estado: estadoRellenado\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2980,
+        "y": 2980,
+        "wires": [
+            [
+                "e0e7b068ec907c29",
+                "7498251e5c49d511"
+            ]
+        ]
+    },
+    {
+        "id": "e0e7b068ec907c29",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Ver Flujo",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.flujo",
+        "targetType": "msg",
+        "x": 3270,
+        "y": 2980,
+        "wires": []
+    },
+    {
+        "id": "7498251e5c49d511",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Ver Estado",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.estado",
+        "targetType": "msg",
+        "x": 3270,
+        "y": 3020,
+        "wires": []
     },
     {
         "id": "a5eba0d9354df196",
@@ -14301,7 +12903,7 @@
         ],
         "seg1": "",
         "seg2": "",
-        "x": 2450,
+        "x": 2430,
         "y": 200,
         "wires": []
     },
