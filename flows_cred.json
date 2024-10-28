@@ -10,5 +10,15 @@
     "da44537352533279": {
         "userid": "energeticosec@gmail.com",
         "password": "wnty cjvz tfle saxt"
+    },
+    "fd6230ad9cb2e464": {
+        "token": "5XtN42pxHc-muDjimouotEPF3j9L3f_Sjty9cmtdRxmNo0d0JGAq4qqUDRoOtkkPEb4xmM8NFvrmlWHYdM7uSA==",
+        "organization": "aspro",
+        "bucket": "monitoring"
+    },
+    "0e4567efc02703e6": {
+        "token": "a68RHFmsdbGj0qxpCnuVZ-FmHaeBtctu-V2FsM-NPiJn3eN0spM4ZaachU0z1fXkQ4UHzayOE2OBgsMo5PVOuw==",
+        "organization": "aspro",
+        "bucket": "refinacion"
     }
 }

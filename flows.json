@@ -35,7 +35,7 @@
         "id": "cf449ce1322fd8eb",
         "type": "tab",
         "label": "T. Principal RTU",
-        "disabled": false,
+        "disabled": true,
         "info": "",
         "env": []
     },
@@ -60,6 +60,14 @@
         "type": "tab",
         "label": "flujo optimizado 1.1",
         "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "74704056515d0eb7",
+        "type": "tab",
+        "label": "T. Principal RTU",
+        "disabled": false,
         "info": "",
         "env": []
     },
@@ -281,7 +289,7 @@
         "page": "53bbd3554f5781e9",
         "width": "12",
         "height": "1",
-        "order": 4,
+        "order": 5,
         "showTitle": true,
         "className": "",
         "visible": "true",
@@ -831,7 +839,7 @@
         "page": "53bbd3554f5781e9",
         "width": "3",
         "height": "1",
-        "order": 1,
+        "order": 2,
         "showTitle": true,
         "className": "",
         "visible": "true",
@@ -935,7 +943,7 @@
         "page": "53bbd3554f5781e9",
         "width": "4",
         "height": "1",
-        "order": 3,
+        "order": 4,
         "showTitle": true,
         "className": "",
         "visible": "true",
@@ -1179,6 +1187,296 @@
                 "py": 0
             }
         }
+    },
+    {
+        "id": "grupo-dashboard",
+        "type": "ui_group",
+        "name": "Monitoreo de Flujo",
+        "tab": "tab-dashboard",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "tab-dashboard",
+        "type": "ui_tab",
+        "name": "Dashboard",
+        "icon": "dashboard",
+        "order": 1
+    },
+    {
+        "id": "fd6230ad9cb2e464",
+        "type": "Stackhero-InfluxDB-v2-Server",
+        "name": "",
+        "host": "localhost",
+        "port": "8086",
+        "tls": false
+    },
+    {
+        "id": "0e4567efc02703e6",
+        "type": "Stackhero-InfluxDB-v2-Server",
+        "name": "",
+        "host": "localhost",
+        "port": "8086",
+        "tls": false
+    },
+    {
+        "id": "4327e35470e78204",
+        "type": "modbus-client",
+        "name": "ADC1",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "192.168.1.209",
+        "tcpPort": "502",
+        "tcpType": "TCP-RTU-BUFFERED",
+        "serialPort": "/dev/ttyUSB1",
+        "serialType": "RTU",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "1000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "3db35b5b9f1e9955",
+        "type": "mqtt-broker",
+        "name": "mqtt_tb_MN-2.1",
+        "broker": "mqtt.thingsboard.cloud",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "481519eae52811d6",
+        "type": "mqtt-broker",
+        "name": "mqtt_tb_MF-1.1",
+        "broker": "mqtt.thingsboard.cloud",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "1ff8a14b5b3c4819",
+        "type": "mqtt-broker",
+        "name": "mqtt_tb_MP-1.1",
+        "broker": "mqtt.thingsboard.cloud",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "95edaed331d6976a",
+        "type": "mqtt-broker",
+        "name": "mqtt_tb_ST-2.1",
+        "broker": "mqtt.thingsboard.cloud",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "c589c5821e6c852e",
+        "type": "ui-group",
+        "name": "Calentador de carga",
+        "page": "53bbd3554f5781e9",
+        "width": "3",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "e231be350056a6a3",
+        "type": "mqtt-broker",
+        "name": "mqtt_tb_ST-2.2",
+        "broker": "mqtt.thingsboard.cloud",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "d41506ab16d7ff6d",
+        "type": "modbus-client",
+        "name": "Waveshare Modbus RTU",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "192.168.1.210",
+        "tcpPort": "503",
+        "tcpType": "TCP-RTU-BUFFERED",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "1000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "your_bot_config_id",
+        "type": "telegram bot",
+        "botname": "TankAlertBot",
+        "usernames": "",
+        "chatids": "",
+        "baseapiurl": "",
+        "updatemode": "polling",
+        "pollinterval": "300",
+        "usesocks": false,
+        "sockshost": "",
+        "socksport": "0",
+        "sockshusername": "anonymous",
+        "sockshpassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbotport": "8443",
+        "publicbotport": "8443",
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "verboselogging": false,
+        "enterprise": false,
+        "status": "disconnected",
+        "autostart": "true",
+        "webhook": false,
+        "connect_timeout": "",
+        "properties": {}
     },
     {
         "id": "bc34e8077dafa34c",
@@ -1877,7 +2175,7 @@
         "group": "3f690bb5a526a246",
         "name": "Volumen FA-09",
         "label": "Volumen FA-09",
-        "order": 1,
+        "order": 34,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -1921,7 +2219,7 @@
         "group": "3f690bb5a526a246",
         "name": "Volumen FA-07",
         "label": "Volumen FA-07",
-        "order": 1,
+        "order": 33,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -3038,7 +3336,7 @@
         "group": "90c50477d9bdd042",
         "name": "Volumen FA-06A",
         "label": "Volumen FA-06A",
-        "order": 1,
+        "order": 3,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -3082,7 +3380,7 @@
         "group": "90c50477d9bdd042",
         "name": "Volumen FA-06B",
         "label": "Volumen FA-06B",
-        "order": 1,
+        "order": 2,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -3501,7 +3799,7 @@
         "z": "0a1446a2506c6a05",
         "name": "Flujo COPE",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 25,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -3604,7 +3902,7 @@
         "z": "0a1446a2506c6a05",
         "name": "Flujo Residuo",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 24,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -4186,7 +4484,7 @@
         "group": "3f690bb5a526a246",
         "name": "Volumen FA-01",
         "label": "Volumen FA-01",
-        "order": 1,
+        "order": 2,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -4230,7 +4528,7 @@
         "group": "3f690bb5a526a246",
         "name": "Volumen FA-09",
         "label": "Volumen FA-09",
-        "order": 3,
+        "order": 4,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -4274,7 +4572,7 @@
         "group": "3f690bb5a526a246",
         "name": "Volumen FA-07",
         "label": "Volumen FA-07",
-        "order": 2,
+        "order": 32,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -5009,8 +5307,8 @@
         "topic": "update",
         "payload": "",
         "payloadType": "date",
-        "x": 750,
-        "y": 600,
+        "x": 590,
+        "y": 620,
         "wires": [
             [
                 "011a5130f50f855b"
@@ -5038,8 +5336,8 @@
         "topic": "next",
         "payload": "",
         "payloadType": "date",
-        "x": 760,
-        "y": 560,
+        "x": 600,
+        "y": 580,
         "wires": [
             [
                 "011a5130f50f855b"
@@ -5065,8 +5363,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 980,
-        "y": 680,
+        "x": 820,
+        "y": 700,
         "wires": [
             [
                 "011a5130f50f855b"
@@ -5085,8 +5383,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 980,
-        "y": 800,
+        "x": 820,
+        "y": 820,
         "wires": [
             [
                 "4fa27a733bf41ad4"
@@ -5119,8 +5417,8 @@
         "topic": "update",
         "payload": "",
         "payloadType": "date",
-        "x": 750,
-        "y": 520,
+        "x": 590,
+        "y": 540,
         "wires": [
             [
                 "011a5130f50f855b"
@@ -5133,8 +5431,8 @@
         "z": "cf449ce1322fd8eb",
         "name": "link in 4",
         "links": [],
-        "x": 795,
-        "y": 480,
+        "x": 635,
+        "y": 500,
         "wires": [
             [
                 "011a5130f50f855b"
@@ -5153,8 +5451,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1190,
-        "y": 820,
+        "x": 1030,
+        "y": 840,
         "wires": [
             []
         ]
@@ -5180,8 +5478,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 740,
-        "y": 960,
+        "x": 580,
+        "y": 980,
         "wires": [
             [
                 "011a5130f50f855b"
@@ -5201,8 +5499,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1720,
-        "y": 720,
+        "x": 1560,
+        "y": 740,
         "wires": [
             [
                 "840fc3448aa7be5e"
@@ -5222,8 +5520,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1650,
-        "y": 420,
+        "x": 1490,
+        "y": 440,
         "wires": [
             [
                 "ceea6d417693d667"
@@ -5288,8 +5586,8 @@
         "keepMsgProperties": false,
         "delayOnStart": false,
         "startDelayTime": "",
-        "x": 1200,
-        "y": 760,
+        "x": 1040,
+        "y": 780,
         "wires": [
             [
                 "aedffd40ec8c287c",
@@ -5330,12 +5628,14 @@
         "checkall": "true",
         "repair": false,
         "outputs": 4,
-        "x": 1430,
-        "y": 740,
+        "x": 1270,
+        "y": 760,
         "wires": [
             [],
             [
-                "73793c2aa437a1be"
+                "73793c2aa437a1be",
+                "316efee7c7e1cbce",
+                "de90a00a9d09e0b2"
             ],
             [],
             []
@@ -5388,7 +5688,7 @@
         "d": true,
         "name": "Flujo COPE",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 23,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -5432,7 +5732,7 @@
         "group": "3f690bb5a526a246",
         "name": "Vol FA-02",
         "label": "Volumen FA-02",
-        "order": 2,
+        "order": 31,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -5524,8 +5824,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 830,
-        "y": 360,
+        "x": 670,
+        "y": 380,
         "wires": [
             [
                 "5b527a16a2653a03"
@@ -5553,8 +5853,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 830,
-        "y": 400,
+        "x": 670,
+        "y": 420,
         "wires": [
             [
                 "3fdc5a44ea1c053c"
@@ -5580,8 +5880,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1010,
-        "y": 360,
+        "x": 850,
+        "y": 380,
         "wires": [
             []
         ]
@@ -5605,8 +5905,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1030,
-        "y": 400,
+        "x": 870,
+        "y": 420,
         "wires": [
             []
         ]
@@ -5632,8 +5932,8 @@
         "topic": "read_ADC1_AI0",
         "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":0,\"quantity\":1}",
         "payloadType": "json",
-        "x": 710,
-        "y": 680,
+        "x": 550,
+        "y": 700,
         "wires": [
             [
                 "011a5130f50f855b"
@@ -5661,10 +5961,12 @@
         "topic": "read_ADC1_AI1",
         "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":1,\"quantity\":1}",
         "payloadType": "json",
-        "x": 710,
-        "y": 720,
+        "x": 550,
+        "y": 740,
         "wires": [
-            []
+            [
+                "011a5130f50f855b"
+            ]
         ]
     },
     {
@@ -5688,8 +5990,8 @@
         "topic": "read_ADC1_AI2",
         "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":2,\"quantity\":1}",
         "payloadType": "json",
-        "x": 710,
-        "y": 760,
+        "x": 550,
+        "y": 780,
         "wires": [
             []
         ]
@@ -5715,8 +6017,8 @@
         "topic": "read_ADC2_AI3",
         "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":2,\"quantity\":1}",
         "payloadType": "json",
-        "x": 710,
-        "y": 800,
+        "x": 550,
+        "y": 820,
         "wires": [
             []
         ]
@@ -5742,8 +6044,8 @@
         "topic": "read_ADC2_AI4",
         "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":0,\"quantity\":1}",
         "payloadType": "json",
-        "x": 710,
-        "y": 840,
+        "x": 550,
+        "y": 860,
         "wires": [
             []
         ]
@@ -5769,8 +6071,8 @@
         "topic": "read_ADC1_AI5",
         "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":6,\"quantity\":1}",
         "payloadType": "json",
-        "x": 710,
-        "y": 880,
+        "x": 550,
+        "y": 900,
         "wires": [
             []
         ]
@@ -5788,8 +6090,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1860,
-        "y": 460,
+        "x": 1700,
+        "y": 480,
         "wires": [
             []
         ]
@@ -5806,8 +6108,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1280,
-        "y": 60,
+        "x": 1540,
+        "y": 120,
         "wires": [
             []
         ]
@@ -5863,7 +6165,7 @@
         "finalize": "",
         "libs": [],
         "x": 1750,
-        "y": 1120,
+        "y": 1100,
         "wires": [
             [
                 "f072d5245b0083c4",
@@ -5884,8 +6186,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1610,
-        "y": 360,
+        "x": 1450,
+        "y": 380,
         "wires": [
             [
                 "e3b3819b25087cd6"
@@ -5899,7 +6201,7 @@
         "d": true,
         "name": "Flujo COPE",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 22,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -5931,8 +6233,8 @@
         "styleRounded": true,
         "styleGlow": false,
         "className": "",
-        "x": 1810,
-        "y": 360,
+        "x": 1650,
+        "y": 380,
         "wires": []
     },
     {
@@ -5971,7 +6273,7 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 890,
+        "x": 870,
         "y": 1100,
         "wires": [
             [
@@ -5991,16 +6293,20 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1060,
+        "x": 1050,
         "y": 1100,
         "wires": [
             [
                 "delay-node",
-                "debug-node",
                 "6a099551450d6cf2",
                 "6912ce81cf94a075",
                 "e1a822778a0fd165",
-                "8bfb32aad261daeb"
+                "8bfb32aad261daeb",
+                "5fa2c07418d9e6b2",
+                "c33cf286f2958d01",
+                "c03d24e75253d81b",
+                "feb06b50b5103539",
+                "3ccbf9397897d307"
             ]
         ]
     },
@@ -6030,20 +6336,6 @@
         ]
     },
     {
-        "id": "debug-node",
-        "type": "debug",
-        "z": "cf449ce1322fd8eb",
-        "name": "Ver en consola",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "x": 1260,
-        "y": 1160,
-        "wires": []
-    },
-    {
         "id": "6912ce81cf94a075",
         "type": "function",
         "z": "cf449ce1322fd8eb",
@@ -6054,8 +6346,8 @@
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "x": 1710,
-        "y": 840,
+        "x": 1550,
+        "y": 860,
         "wires": [
             [
                 "aec536a7489b60be"
@@ -6075,8 +6367,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1950,
-        "y": 840,
+        "x": 1880,
+        "y": 820,
         "wires": [
             [
                 "08c3459fd6a3321e",
@@ -6110,7 +6402,7 @@
         "z": "cf449ce1322fd8eb",
         "d": true,
         "group": "3f690bb5a526a246",
-        "order": 5,
+        "order": 11,
         "width": "5",
         "height": "1",
         "name": "Estado del Tanque",
@@ -6145,7 +6437,7 @@
         "d": true,
         "name": "Flujo COPE",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 21,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -6198,7 +6490,6 @@
         "wires": [
             [
                 "40e565bc204794ba",
-                "3cc5a6c004a089cd",
                 "6a099551450d6cf2",
                 "6912ce81cf94a075",
                 "e1a822778a0fd165"
@@ -6247,27 +6538,13 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 890,
+        "x": 870,
         "y": 1220,
         "wires": [
             [
                 "b6ece23c7664678a"
             ]
         ]
-    },
-    {
-        "id": "3cc5a6c004a089cd",
-        "type": "debug",
-        "z": "cf449ce1322fd8eb",
-        "name": "Ver en consola",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "x": 1260,
-        "y": 1280,
-        "wires": []
     },
     {
         "id": "function-node-stable",
@@ -6423,7 +6700,7 @@
         "z": "cf449ce1322fd8eb",
         "d": true,
         "group": "3f690bb5a526a246",
-        "order": 5,
+        "order": 10,
         "width": "5",
         "height": "1",
         "name": "Estado del Tanque",
@@ -6458,7 +6735,7 @@
         "d": true,
         "name": "Flujo COPE",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 20,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -6506,8 +6783,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1990,
-        "y": 1060,
+        "x": 1970,
+        "y": 1100,
         "wires": [
             []
         ]
@@ -6522,13 +6799,14 @@
         "noerr": 0,
         "initialize": "",
         "finalize": "",
-        "x": 2650,
-        "y": 2180,
+        "x": 2800,
+        "y": 1500,
         "wires": [
             [
                 "87f4069ec6b3f504",
                 "cd9fb8a2e7d6a362",
-                "316efee7c7e1cbce"
+                "316efee7c7e1cbce",
+                "e1aa3f17b348bf37"
             ]
         ]
     },
@@ -6542,8 +6820,8 @@
         "console": false,
         "complete": "payload",
         "targetType": "msg",
-        "x": 2890,
-        "y": 2240,
+        "x": 3040,
+        "y": 1560,
         "wires": []
     },
     {
@@ -6552,7 +6830,7 @@
         "z": "cf449ce1322fd8eb",
         "name": "Retardo 2 segundos",
         "pauseType": "delay",
-        "timeout": "1",
+        "timeout": "2",
         "timeoutUnits": "seconds",
         "rate": "1",
         "nbRateUnits": "1",
@@ -6563,8 +6841,8 @@
         "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 2850,
-        "y": 2180,
+        "x": 3000,
+        "y": 1500,
         "wires": [
             [
                 "0568bbba8b436882"
@@ -6588,105 +6866,13 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 2470,
-        "y": 2180,
+        "x": 2620,
+        "y": 1500,
         "wires": [
             [
                 "0568bbba8b436882"
             ]
         ]
-    },
-    {
-        "id": "b4c67729d907f710",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Data Accumulation Node",
-        "func": "let lecturas = flow.get(\"lecturasVolumen\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual\nconst registro = {\n    tiempo: Date.now(),\n    volumen: msg.payload // Usar msg.payload directamente\n};\nlecturas.push(registro);\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nconst tiempoActual = Date.now();\nlecturas = lecturas.filter(r => (tiempoActual - r.tiempo) <= tiempoMaximo);\n\n// Guardar las lecturas actualizadas en el contexto del flujo\nflow.set(\"lecturasVolumen\", lecturas);\n\n// Pasar las lecturas completas al siguiente nodo para su procesamiento\nreturn { payload: lecturas };",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2520,
-        "y": 2320,
-        "wires": [
-            [
-                "a2cecd8688116999",
-                "50f05e58605974bb"
-            ]
-        ]
-    },
-    {
-        "id": "a2cecd8688116999",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Detectar Rellenado",
-        "func": "const lecturas = msg.payload;\nconst estadoAnterior = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoActual = estadoAnterior;\n\nconst umbralIncremento = 3; // Ajustar según el incremento que indique rellenado\nconst umbralLecturas = 5; // Número de lecturas para considerar el incremento\n\nif (lecturas.length >= umbralLecturas) {\n    const volumenAnterior = lecturas[lecturas.length - umbralLecturas].volumen;\n    const volumenActual = lecturas[lecturas.length - 1].volumen;\n    const deltaVolumen = volumenActual - volumenAnterior;\n\n    if (deltaVolumen >= umbralIncremento && estadoAnterior === 'Operación Normal') {\n        estadoActual = 'En Rellenado';\n        flow.set('inicioRellenado', Date.now());\n    } else if (deltaVolumen <= 0 && estadoAnterior === 'En Rellenado') {\n        estadoActual = 'Operación Normal';\n        flow.set('finRellenado', Date.now());\n    }\n}\n\nflow.set('estadoRellenado', estadoActual);\nmsg.payload = estadoActual;\nreturn msg;",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2750,
-        "y": 2320,
-        "wires": [
-            [
-                "50f05e58605974bb"
-            ]
-        ]
-    },
-    {
-        "id": "50f05e58605974bb",
-        "type": "function",
-        "z": "cf449ce1322fd8eb",
-        "name": "Calcular Flujo",
-        "func": "const lecturas = flow.get(\"lecturasVolumen\");\nconst estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\nlet flujo = null;\n\nif (estadoRellenado === 'Operación Normal') {\n    if (lecturas.length >= 2) {\n        const volumenAnterior = lecturas[lecturas.length - 2].volumen;\n        const tiempoAnterior = lecturas[lecturas.length - 2].tiempo;\n        const volumenActual = lecturas[lecturas.length - 1].volumen;\n        const tiempoActual = lecturas[lecturas.length - 1].tiempo;\n\n        const deltaVolumen = volumenActual - volumenAnterior;\n        const deltaTiempo = (tiempoActual - tiempoAnterior) / 1000; // en segundos\n\n        flujo = -deltaVolumen / deltaTiempo; // Negativo porque el volumen disminuye\n\n        // Guardar el último flujo válido\n        flow.set('ultimoFlujoValido', flujo);\n    } else {\n        flujo = flow.get('ultimoFlujoValido') || 0;\n    }\n} else if (estadoRellenado === 'En Rellenado') {\n    // Usar el último flujo válido\n    flujo = flow.get('ultimoFlujoValido') || 0;\n}\n\nmsg.payload = {\n    flujo: flujo,\n    estado: estadoRellenado\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2960,
-        "y": 2320,
-        "wires": [
-            [
-                "e0e6929eae6eb323",
-                "d18de17a173e405b"
-            ]
-        ]
-    },
-    {
-        "id": "e0e6929eae6eb323",
-        "type": "debug",
-        "z": "cf449ce1322fd8eb",
-        "name": "Ver Flujo",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload.flujo",
-        "targetType": "msg",
-        "x": 3120,
-        "y": 2280,
-        "wires": []
-    },
-    {
-        "id": "d18de17a173e405b",
-        "type": "debug",
-        "z": "cf449ce1322fd8eb",
-        "name": "Ver Estado",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload.estado",
-        "targetType": "msg",
-        "x": 3120,
-        "y": 2320,
-        "wires": []
     },
     {
         "id": "1e7408a44bb6c103",
@@ -6700,13 +6886,14 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2090,
-        "y": 2200,
+        "x": 2670,
+        "y": 1120,
         "wires": [
             [
                 "395f4213228f79e0",
                 "1f113caa7dcee4f9",
-                "316efee7c7e1cbce"
+                "316efee7c7e1cbce",
+                "e1aa3f17b348bf37"
             ]
         ]
     },
@@ -6719,7 +6906,7 @@
         "timeout": "5",
         "timeoutUnits": "seconds",
         "rate": "1",
-        "nbRateUnits": "2",
+        "nbRateUnits": "1",
         "rateUnits": "second",
         "randomFirst": "1",
         "randomLast": "5",
@@ -6727,8 +6914,8 @@
         "drop": false,
         "allowrate": false,
         "outputs": 1,
-        "x": 2290,
-        "y": 2200,
+        "x": 2870,
+        "y": 1120,
         "wires": [
             [
                 "1e7408a44bb6c103"
@@ -6752,8 +6939,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 1930,
-        "y": 2200,
+        "x": 2510,
+        "y": 1120,
         "wires": [
             [
                 "1e7408a44bb6c103"
@@ -6770,14 +6957,15 @@
         "console": false,
         "complete": "payload",
         "targetType": "msg",
-        "x": 2300,
-        "y": 2260,
+        "x": 2880,
+        "y": 1180,
         "wires": []
     },
     {
         "id": "316efee7c7e1cbce",
         "type": "function",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "Data Accumulation Node",
         "func": "let lecturas = flow.get(\"lecturasVolumen\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual\nconst registro = {\n    tiempo: Date.now(),\n    volumen: msg.payload // Usar msg.payload directamente\n};\nlecturas.push(registro);\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nconst tiempoActual = Date.now();\nlecturas = lecturas.filter(r => (tiempoActual - r.tiempo) <= tiempoMaximo);\n\n// Guardar las lecturas actualizadas en el contexto del flujo\nflow.set(\"lecturasVolumen\", lecturas);\n\n// Pasar las lecturas completas al siguiente nodo para su procesamiento\nreturn { payload: lecturas };",
         "outputs": 1,
@@ -6786,8 +6974,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2430,
-        "y": 2940,
+        "x": 2790,
+        "y": 640,
         "wires": [
             [
                 "ddff9f1fbcfdd1d8"
@@ -6798,11 +6986,12 @@
         "id": "ddff9f1fbcfdd1d8",
         "type": "function",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "Detectar Rellenado",
         "func": "const lecturas = msg.payload;\nconst estadoAnterior = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoActual = estadoAnterior;\n\nconst umbralIncremento = 3; // Ajustar según necesidad\nconst umbralLecturas = 5;   // Número de lecturas a considerar\n\nif (lecturas.length >= umbralLecturas) {\n    const volumenAnterior = lecturas[lecturas.length - umbralLecturas].volumen;\n    const volumenActual = lecturas[lecturas.length - 1].volumen;\n    const deltaVolumen = volumenActual - volumenAnterior;\n\n    if (deltaVolumen >= umbralIncremento && estadoAnterior === 'Operación Normal') {\n        estadoActual = 'En Rellenado';\n        flow.set('inicioRellenado', Date.now());\n    } else if (deltaVolumen <= -umbralIncremento && estadoAnterior === 'En Rellenado') {\n        estadoActual = 'Operación Normal';\n        flow.set('finRellenado', Date.now());\n    }\n}\n\nflow.set('estadoRellenado', estadoActual);\nmsg.payload = estadoActual;\n\n// Actualizar el estado anterior para la próxima iteración\nflow.set('estadoAnterior', estadoActual);\n\nreturn msg;",
         "outputs": 1,
-        "x": 2690,
-        "y": 2940,
+        "x": 3050,
+        "y": 640,
         "wires": [
             [
                 "5ce82d5b2a5001b5",
@@ -6814,6 +7003,7 @@
         "id": "5ce82d5b2a5001b5",
         "type": "function",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "Filtrar Lecturas No Válidas",
         "func": "let estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoAnterior = flow.get('estadoAnterior') || 'Operación Normal';\n\nif (estadoAnterior === 'En Rellenado' && estadoRellenado === 'Operación Normal') {\n    // El estado cambió de 'En Rellenado' a 'Operación Normal'\n    let lecturas = flow.get('lecturasVolumen') || [];\n    let inicioRellenado = flow.get('inicioRellenado') || Date.now();\n\n    // Eliminar lecturas durante 'En Rellenado'\n    lecturas = lecturas.filter(registro => registro.tiempo < inicioRellenado);\n\n    flow.set('lecturasVolumen', lecturas);\n}\n\n// Actualizar el estado anterior\nflow.set('estadoAnterior', estadoRellenado);\n\nreturn msg;",
         "outputs": 1,
@@ -6822,8 +7012,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2980,
-        "y": 2900,
+        "x": 3340,
+        "y": 600,
         "wires": [
             []
         ]
@@ -6832,6 +7022,7 @@
         "id": "d1f8549f846a27b6",
         "type": "function",
         "z": "cf449ce1322fd8eb",
+        "d": true,
         "name": "Calcular Flujo",
         "func": "const lecturas = flow.get(\"lecturasVolumen\") || [];\nconst estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\n\n// Obtener el último flujo válido almacenado\nlet ultimoFlujoValido = flow.get('ultimoFlujoValido');\n\n// Variable para el flujo actual\nlet flujo = ultimoFlujoValido || 0; // Usar el último flujo válido por defecto\n\n// Verificar el estado actual\nif (estadoRellenado === 'Operación Normal') {\n    if (lecturas.length >= 2) {\n        const volumenAnterior = lecturas[lecturas.length - 2].volumen;\n        const tiempoAnterior = lecturas[lecturas.length - 2].tiempo;\n        const volumenActual = lecturas[lecturas.length - 1].volumen;\n        const tiempoActual = lecturas[lecturas.length - 1].tiempo;\n\n        const deltaVolumen = volumenActual - volumenAnterior;\n        const deltaTiempo = (tiempoActual - tiempoAnterior) / 1000; // en segundos\n\n        if (deltaVolumen <= 0) {\n            // Volumen está disminuyendo, calcular flujo\n            flujo = -deltaVolumen / deltaTiempo; // flujo positivo\n\n            // Actualizar el último flujo válido\n            ultimoFlujoValido = flujo;\n            flow.set('ultimoFlujoValido', ultimoFlujoValido);\n        } else {\n            // Volumen está aumentando, no actualizar flujo ni ultimoFlujoValido\n            flujo = ultimoFlujoValido;\n        }\n    } else {\n        // Si no hay suficientes lecturas, mantener el último flujo válido\n        flujo = ultimoFlujoValido;\n    }\n} else if (estadoRellenado === 'En Rellenado') {\n    // Durante 'En Rellenado', no actualizar 'ultimoFlujoValido' ni recalcular 'flujo'\n    flujo = ultimoFlujoValido;\n}\n\n// Preparar el mensaje de salida\nmsg.payload = {\n    flujo: flujo,\n    estado: estadoRellenado\n};\n\nreturn msg;\n",
         "outputs": 1,
@@ -6840,17 +7031,763 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2980,
-        "y": 2980,
+        "x": 3340,
+        "y": 680,
         "wires": [
             [
                 "e0e7b068ec907c29",
-                "7498251e5c49d511"
+                "7498251e5c49d511",
+                "a5d3f9a159cbc6eb"
             ]
         ]
     },
     {
         "id": "e0e7b068ec907c29",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Ver Flujo",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.flujo",
+        "targetType": "msg",
+        "x": 3630,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "7498251e5c49d511",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Ver Estado",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.estado",
+        "targetType": "msg",
+        "x": 3630,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "13627e2530e0c75a",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "calc_vol",
+        "func": "const valorCrudo = msg.payload;\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Mantener solo el valor numérico\nreturn msg;\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2190,
+        "y": 1360,
+        "wires": [
+            [
+                "f999ef3dbea849a0",
+                "2bc3962351a71991",
+                "eba2598b20143d66"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "9c7c2978048273e6",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Data Accumulation Node",
+        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload[0] // Asumiendo que el volumen viene en msg.payload como primer elemento del array\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2790,
+        "y": 840,
+        "wires": [
+            [
+                "243095185b5c27b7"
+            ]
+        ]
+    },
+    {
+        "id": "243095185b5c27b7",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Flow Calculation Node",
+        "func": "const cola = msg.payload;\nlet flujo = 0;\n\nif (cola.length > 1) {\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0) {\n        flujo = Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600); // calcular flujo\n    }\n} else {\n    // Manejar el caso cuando no hay suficientes registros para calcular un flujo\n    flujo = \"Insuficientes datos para cálculo de flujo\";\n}\n\n// Devolver el valor del flujo\nreturn { payload: flujo };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2820,
+        "y": 780,
+        "wires": [
+            [
+                "751b21fdfa73822d",
+                "76585241d3577ebb",
+                "356c3d848c4558ef"
+            ]
+        ]
+    },
+    {
+        "id": "751b21fdfa73822d",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Flujo COPE",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 3090,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "76585241d3577ebb",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "telemetria",
+        "func": "msg.payload = {\n  flujo: msg.payload\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3080,
+        "y": 820,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f999ef3dbea849a0",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "telemetria",
+        "func": "msg.payload = {\n  volumen: msg.payload\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2420,
+        "y": 1380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "356c3d848c4558ef",
+        "type": "ui-gauge",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Flujo COPE",
+        "group": "3f690bb5a526a246",
+        "order": 19,
+        "width": "5",
+        "height": "4",
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Flujo COPE",
+        "units": "L/h",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ea5353"
+            },
+            {
+                "from": "4000",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "7500",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "10000",
+        "sizeThickness": "26",
+        "sizeGap": "3",
+        "sizeKeyThickness": "20",
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 3090,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "7fd268cf5ee60737",
+        "type": "ui-chart",
+        "z": "cf449ce1322fd8eb",
+        "group": "3f690bb5a526a246",
+        "name": "Volumen FA-02",
+        "label": "Volumen FA-02",
+        "order": 30,
+        "chartType": "bar",
+        "category": "label",
+        "categoryType": "property",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "property",
+        "xAxisType": "category",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "yAxisLabel": "",
+        "yAxisProperty": "value",
+        "ymin": "0",
+        "ymax": "40000",
+        "action": "replace",
+        "stackSeries": true,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": false,
+        "removeOlder": 1,
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#227dbf",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "2",
+        "height": "5",
+        "className": "",
+        "x": 2760,
+        "y": 1340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2bc3962351a71991",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "formato_ui",
+        "func": "msg.payload = [{\n    x: msg.payload + \" Litros\",  // This will become the x-axis label\n    y: msg.payload  // The actual value\n}];\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2590,
+        "y": 1340,
+        "wires": [
+            [
+                "7fd268cf5ee60737"
+            ]
+        ]
+    },
+    {
+        "id": "eba2598b20143d66",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "debug 97",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2360,
+        "y": 1440,
+        "wires": []
+    },
+    {
+        "id": "a5d3f9a159cbc6eb",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "conversion",
+        "func": "// Factor de conversión de unidades a litros\nconst factorUnidadesALitros = 2.5; // Cada unidad representa 2.5 litros\nconst offsetUnidades = 4000; // 4000 unidades corresponden a 0 litros\n\n// Obtener el flujo y el estado del mensaje anterior\nlet flujoUnidadesPorSegundo = msg.payload.flujo; // Flujo en unidades/segundo\nlet estado = msg.payload.estado;\n\n// Convertir flujo a litros/hora\n// 1. Convertir flujo de unidades/segundo a unidades/hora\nlet flujoUnidadesPorHora = flujoUnidadesPorSegundo * 3600;\n\n// 2. Convertir flujo de unidades/hora a litros/hora\nlet flujoLitrosPorHora = flujoUnidadesPorHora * factorUnidadesALitros;\n\n// Redondear el flujo a un número entero\nlet flujoLitrosPorHoraEntero = Math.round(flujoLitrosPorHora);\n\n// Preparar el mensaje de salida\nmsg.payload = flujoLitrosPorHoraEntero; // Solo el flujo en litros/hora, sin decimales\nmsg.estado = estado; // Estado separado en msg.estado\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3450,
+        "y": 840,
+        "wires": [
+            [
+                "129cff47c30bd57c",
+                "ef2b913edce5d84a",
+                "b96deb5748423b18"
+            ]
+        ]
+    },
+    {
+        "id": "129cff47c30bd57c",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "debug 98",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 3640,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "ef2b913edce5d84a",
+        "type": "ui-gauge",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Flujo COPE",
+        "group": "3f690bb5a526a246",
+        "order": 18,
+        "width": "5",
+        "height": "4",
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Flujo COPE",
+        "units": "L/h",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ea5353"
+            },
+            {
+                "from": "4000",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "7500",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "10000",
+        "sizeThickness": "26",
+        "sizeGap": "3",
+        "sizeKeyThickness": "20",
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 3650,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "b96deb5748423b18",
+        "type": "change",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "estado",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 3640,
+        "y": 900,
+        "wires": [
+            [
+                "be3ab8d30d97162b"
+            ]
+        ]
+    },
+    {
+        "id": "be3ab8d30d97162b",
+        "type": "ui-text",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "group": "3f690bb5a526a246",
+        "order": 9,
+        "width": "5",
+        "height": "1",
+        "name": "Estado del Tanque",
+        "label": "Estado:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "className": "",
+        "x": 3830,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "de90a00a9d09e0b2",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "debug 99",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1510,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "4ce0a76effdc8b8d",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Data Accumulation Node",
+        "func": "let lecturas = flow.get(\"lecturasVolumen\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual\nconst registro = {\n    tiempo: Date.now(),\n    volumen: msg.payload // Usar msg.payload directamente\n};\nlecturas.push(registro);\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nconst tiempoActual = Date.now();\nlecturas = lecturas.filter(r => (tiempoActual - r.tiempo) <= tiempoMaximo);\n\n// Guardar las lecturas actualizadas en el contexto del flujo\nflow.set(\"lecturasVolumen\", lecturas);\n\n// Pasar las lecturas completas al siguiente nodo para su procesamiento\nreturn { payload: lecturas };",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2910,
+        "y": 980,
+        "wires": [
+            [
+                "e10330330f6799a4"
+            ]
+        ]
+    },
+    {
+        "id": "e10330330f6799a4",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Detectar Rellenado",
+        "func": "const lecturas = msg.payload;\nconst estadoAnterior = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoActual = estadoAnterior;\n\nconst umbralIncremento = 3; // Ajustar según necesidad\nconst umbralLecturas = 5;   // Número de lecturas a considerar\n\nif (lecturas.length >= umbralLecturas) {\n    const volumenAnterior = lecturas[lecturas.length - umbralLecturas].volumen;\n    const volumenActual = lecturas[lecturas.length - 1].volumen;\n    const deltaVolumen = volumenActual - volumenAnterior;\n\n    if (deltaVolumen >= umbralIncremento && estadoAnterior === 'Operación Normal') {\n        estadoActual = 'En Rellenado';\n        flow.set('inicioRellenado', Date.now());\n    } else if (deltaVolumen <= -umbralIncremento && estadoAnterior === 'En Rellenado') {\n        estadoActual = 'Operación Normal';\n        flow.set('finRellenado', Date.now());\n    }\n}\n\nflow.set('estadoRellenado', estadoActual);\nmsg.payload = estadoActual;\n\n// Actualizar el estado anterior para la próxima iteración\nflow.set('estadoAnterior', estadoActual);\n\nreturn msg;",
+        "outputs": 1,
+        "x": 3170,
+        "y": 980,
+        "wires": [
+            [
+                "67b00f468958d140",
+                "fef2056d66cacffc"
+            ]
+        ]
+    },
+    {
+        "id": "67b00f468958d140",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Filtrar Lecturas No Válidas",
+        "func": "let estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoAnterior = flow.get('estadoAnterior') || 'Operación Normal';\n\nif (estadoAnterior === 'En Rellenado' && estadoRellenado === 'Operación Normal') {\n    // El estado cambió de 'En Rellenado' a 'Operación Normal'\n    let lecturas = flow.get('lecturasVolumen') || [];\n    let inicioRellenado = flow.get('inicioRellenado') || Date.now();\n\n    // Eliminar lecturas durante 'En Rellenado'\n    lecturas = lecturas.filter(registro => registro.tiempo < inicioRellenado);\n\n    flow.set('lecturasVolumen', lecturas);\n}\n\n// Actualizar el estado anterior\nflow.set('estadoAnterior', estadoRellenado);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3460,
+        "y": 980,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fef2056d66cacffc",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Calcular Flujo",
+        "func": "const lecturas = flow.get(\"lecturasVolumen\") || [];\nconst estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\n\n// Obtener el último flujo válido almacenado\nlet ultimoFlujoValido = flow.get('ultimoFlujoValido') || 0;\n\n// Variable para el flujo actual\nlet flujo = ultimoFlujoValido;\n\n// Verificar el estado actual\nif (estadoRellenado === 'Operación Normal') {\n    if (lecturas.length >= 2) {\n        // Obtener el volumen más antiguo y el más reciente en la cola de 5 minutos\n        const volumenInicial = lecturas[0].volumen;\n        const tiempoInicial = lecturas[0].tiempo;\n        const volumenFinal = lecturas[lecturas.length - 1].volumen;\n        const tiempoFinal = lecturas[lecturas.length - 1].tiempo;\n\n        const deltaVolumenTotal = volumenFinal - volumenInicial;\n        const deltaTiempoTotal = (tiempoFinal - tiempoInicial) / 1000; // en segundos\n\n        // Verificar que deltaTiempoTotal sea mayor que cero\n        if (deltaTiempoTotal > 0) {\n            if (deltaVolumenTotal < 0) {\n                // Volumen está disminuyendo, calcular flujo\n                flujo = -deltaVolumenTotal / deltaTiempoTotal; // flujo positivo en unidades/segundo\n\n                // Actualizar el último flujo válido\n                ultimoFlujoValido = flujo;\n                flow.set('ultimoFlujoValido', ultimoFlujoValido);\n            } else {\n                // Volumen está aumentando o constante, no actualizar flujo ni ultimoFlujoValido\n                flujo = ultimoFlujoValido;\n            }\n        } else {\n            // deltaTiempoTotal no es válido, mantener el último flujo válido\n            flujo = ultimoFlujoValido;\n        }\n    } else {\n        // Si no hay suficientes lecturas, mantener el último flujo válido\n        flujo = ultimoFlujoValido;\n    }\n} else if (estadoRellenado === 'En Rellenado') {\n    // Durante 'En Rellenado', no actualizar 'ultimoFlujoValido' ni recalcular 'flujo'\n    flujo = ultimoFlujoValido;\n}\n\n// Guardar el volumen actual para uso futuro (si es necesario)\nif (lecturas.length > 0) {\n    flow.set('volumenActual', lecturas[lecturas.length - 1].volumen);\n}\n\n// Preparar el mensaje de salida\nmsg.payload = {\n    flujo: flujo,\n    estado: estadoRellenado\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3460,
+        "y": 1020,
+        "wires": [
+            [
+                "0d9b38ce16d86721",
+                "d8e88e387767ca13",
+                "d5ac7567f5fdfe74"
+            ]
+        ]
+    },
+    {
+        "id": "0d9b38ce16d86721",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Ver Flujo",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.flujo",
+        "targetType": "msg",
+        "x": 3750,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "d8e88e387767ca13",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Ver Estado",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload.estado",
+        "targetType": "msg",
+        "x": 3750,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "d5ac7567f5fdfe74",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "conversion",
+        "func": "// Factor de conversión de unidades a litros\nconst factorUnidadesALitros = 2.5; // Cada unidad representa 2.5 litros\nconst offsetUnidades = 4000; // 4000 unidades corresponden a 0 litros\n\n// Obtener el flujo y el estado del mensaje anterior\nlet flujoUnidadesPorSegundo = msg.payload.flujo; // Flujo en unidades/segundo\nlet estado = msg.payload.estado;\n\n// Convertir flujo a litros/hora\n// 1. Convertir flujo de unidades/segundo a unidades/hora\nlet flujoUnidadesPorHora = flujoUnidadesPorSegundo * 3600;\n\n// 2. Convertir flujo de unidades/hora a litros/hora\nlet flujoLitrosPorHora = flujoUnidadesPorHora * factorUnidadesALitros;\n\n// Redondear el flujo a un número entero\nlet flujoLitrosPorHoraEntero = Math.round(flujoLitrosPorHora);\n\n// Preparar el mensaje de salida\nmsg.payload = flujoLitrosPorHoraEntero; // Solo el flujo en litros/hora, sin decimales\nmsg.estado = estado; // Estado separado en msg.estado\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3570,
+        "y": 1140,
+        "wires": [
+            [
+                "a21c8ce59132d035",
+                "81fcd4556a98efc0",
+                "3d9138dc415fd428"
+            ]
+        ]
+    },
+    {
+        "id": "a21c8ce59132d035",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "debug 100",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 3760,
+        "y": 1140,
+        "wires": []
+    },
+    {
+        "id": "81fcd4556a98efc0",
+        "type": "ui-gauge",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "Flujo COPE",
+        "group": "3f690bb5a526a246",
+        "order": 17,
+        "width": "5",
+        "height": "4",
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Flujo COPE",
+        "units": "L/h",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ea5353"
+            },
+            {
+                "from": "4000",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "7500",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "10000",
+        "sizeThickness": "26",
+        "sizeGap": "3",
+        "sizeKeyThickness": "20",
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 3770,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "3d9138dc415fd428",
+        "type": "change",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "estado",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 3760,
+        "y": 1220,
+        "wires": [
+            [
+                "05f429e4c66c4e47"
+            ]
+        ]
+    },
+    {
+        "id": "05f429e4c66c4e47",
+        "type": "ui-text",
+        "z": "cf449ce1322fd8eb",
+        "d": true,
+        "group": "3f690bb5a526a246",
+        "order": 8,
+        "width": "5",
+        "height": "1",
+        "name": "Estado del Tanque",
+        "label": "Estado:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "className": "",
+        "x": 3950,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "3e9590f07b5a32b0",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Detectar Rellenado",
+        "func": "const lecturas = msg.payload;\nconst estadoAnterior = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoActual = estadoAnterior;\n\nconst umbralIncremento = 1; // Reducir para detectar aumentos pequeños\nconst umbralLecturas = 2;   // Reducir para reaccionar más rápido\n\nif (lecturas.length >= umbralLecturas) {\n    const volumenAnterior = lecturas[lecturas.length - umbralLecturas].volumen;\n    const volumenActual = lecturas[lecturas.length - 1].volumen;\n    const deltaVolumen = volumenActual - volumenAnterior;\n\n    if (deltaVolumen >= umbralIncremento && estadoAnterior === 'Operación Normal') {\n        estadoActual = 'En Rellenado';\n        flow.set('inicioRellenado', Date.now());\n    } else if (deltaVolumen <= -umbralIncremento && estadoAnterior === 'En Rellenado') {\n        estadoActual = 'Operación Normal';\n        flow.set('finRellenado', Date.now());\n    }\n}\n\nflow.set('estadoRellenado', estadoActual);\nmsg.payload = estadoActual;\n\n// Actualizar el estado anterior para la próxima iteración\nflow.set('estadoAnterior', estadoActual);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3370,
+        "y": 1340,
+        "wires": [
+            [
+                "37a1389e57047300",
+                "f208ccfe23bc601b"
+            ]
+        ]
+    },
+    {
+        "id": "37a1389e57047300",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Filtrar Lecturas No Válidas",
+        "func": "let estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\nlet estadoAnterior = flow.get('estadoAnterior') || 'Operación Normal';\n\nif (estadoAnterior !== estadoRellenado) {\n    if (estadoRellenado === 'En Rellenado') {\n        // Al entrar en 'En Rellenado', limpiar las lecturas\n        flow.set('lecturasVolumen', []);\n    } else if (estadoRellenado === 'Operación Normal') {\n        // Al regresar a 'Operación Normal', limpiar las lecturas\n        flow.set('lecturasVolumen', []);\n    }\n}\n\n// Actualizar el estado anterior\nflow.set('estadoAnterior', estadoRellenado);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3660,
+        "y": 1340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f208ccfe23bc601b",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Calcular Flujo",
+        "func": "const lecturas = flow.get(\"lecturasVolumen\") || [];\nconst estadoRellenado = flow.get('estadoRellenado') || 'Operación Normal';\n\n// Obtener el último flujo válido almacenado\nlet ultimoFlujoValido = flow.get('ultimoFlujoValido') || 0;\n\n// Variable para el flujo actual\nlet flujo = ultimoFlujoValido;\n\n// Verificar el estado actual\nif (estadoRellenado === 'Operación Normal') {\n    if (lecturas.length >= 2) {\n        // Obtener el volumen más antiguo y el más reciente en la cola de 5 minutos\n        const volumenInicial = lecturas[0].volumen;\n        const tiempoInicial = lecturas[0].tiempo;\n        const volumenFinal = lecturas[lecturas.length - 1].volumen;\n        const tiempoFinal = lecturas[lecturas.length - 1].tiempo;\n\n        const deltaVolumenTotal = volumenFinal - volumenInicial;\n        const deltaTiempoTotal = (tiempoFinal - tiempoInicial) / 1000; // en segundos\n\n        // Verificar que deltaTiempoTotal sea mayor que cero\n        if (deltaTiempoTotal > 0) {\n            if (deltaVolumenTotal < 0) {\n                // Volumen está disminuyendo, calcular flujo\n                flujo = -deltaVolumenTotal / deltaTiempoTotal; // flujo positivo en unidades/segundo\n\n                // Actualizar el último flujo válido\n                ultimoFlujoValido = flujo;\n                flow.set('ultimoFlujoValido', ultimoFlujoValido);\n            } else {\n                // Volumen está aumentando o constante, no actualizar flujo ni ultimoFlujoValido\n                flujo = ultimoFlujoValido;\n            }\n        } else {\n            // deltaTiempoTotal no es válido, mantener el último flujo válido\n            flujo = ultimoFlujoValido;\n        }\n    } else {\n        // Si no hay suficientes lecturas, mantener el último flujo válido\n        flujo = ultimoFlujoValido;\n    }\n} else if (estadoRellenado === 'En Rellenado') {\n    // Durante 'En Rellenado', no actualizar 'ultimoFlujoValido' ni recalcular 'flujo'\n    flujo = ultimoFlujoValido;\n}\n\n// Guardar el volumen actual para uso futuro (si es necesario)\nif (lecturas.length > 0) {\n    flow.set('volumenActual', lecturas[lecturas.length - 1].volumen);\n}\n\n// Preparar el mensaje de salida\nmsg.payload = {\n    flujo: flujo,\n    estado: estadoRellenado\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3660,
+        "y": 1380,
+        "wires": [
+            [
+                "e41623f708c47f0b",
+                "f44895fac13ee405",
+                "36ae0ea17d497de3"
+            ]
+        ]
+    },
+    {
+        "id": "e41623f708c47f0b",
         "type": "debug",
         "z": "cf449ce1322fd8eb",
         "name": "Ver Flujo",
@@ -6860,12 +7797,12 @@
         "tostatus": false,
         "complete": "payload.flujo",
         "targetType": "msg",
-        "x": 3270,
-        "y": 2980,
+        "x": 3950,
+        "y": 1380,
         "wires": []
     },
     {
-        "id": "7498251e5c49d511",
+        "id": "f44895fac13ee405",
         "type": "debug",
         "z": "cf449ce1322fd8eb",
         "name": "Ver Estado",
@@ -6875,9 +7812,495 @@
         "tostatus": false,
         "complete": "payload.estado",
         "targetType": "msg",
-        "x": 3270,
-        "y": 3020,
+        "x": 3950,
+        "y": 1420,
         "wires": []
+    },
+    {
+        "id": "36ae0ea17d497de3",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "conversion",
+        "func": "// Factor de conversión de unidades a litros\nconst factorUnidadesALitros = 2.5; // Cada unidad representa 2.5 litros\nconst offsetUnidades = 4000; // 4000 unidades corresponden a 0 litros\n\n// Obtener el flujo y el estado del mensaje anterior\nlet flujoUnidadesPorSegundo = msg.payload.flujo; // Flujo en unidades/segundo\nlet estado = msg.payload.estado;\n\n// Convertir flujo a litros/hora\n// 1. Convertir flujo de unidades/segundo a unidades/hora\nlet flujoUnidadesPorHora = flujoUnidadesPorSegundo * 3600;\n\n// 2. Convertir flujo de unidades/hora a litros/hora\nlet flujoLitrosPorHora = flujoUnidadesPorHora * factorUnidadesALitros;\n\n// Redondear el flujo a un número entero\nlet flujoLitrosPorHoraEntero = Math.round(flujoLitrosPorHora);\n\n// Preparar el mensaje de salida\nmsg.payload = flujoLitrosPorHoraEntero; // Solo el flujo en litros/hora, sin decimales\nmsg.estado = estado; // Estado separado en msg.estado\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3770,
+        "y": 1500,
+        "wires": [
+            [
+                "d23a003cde3d82f6",
+                "58f89d63b8c9539f",
+                "87d66cceec0a12bc"
+            ]
+        ]
+    },
+    {
+        "id": "d23a003cde3d82f6",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "debug 101",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 3960,
+        "y": 1500,
+        "wires": []
+    },
+    {
+        "id": "58f89d63b8c9539f",
+        "type": "ui-gauge",
+        "z": "cf449ce1322fd8eb",
+        "name": "Flujo COPE",
+        "group": "3f690bb5a526a246",
+        "order": 16,
+        "width": "5",
+        "height": "4",
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Flujo COPE",
+        "units": "L/h",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ea5353"
+            },
+            {
+                "from": "4000",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "7500",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "10000",
+        "sizeThickness": "26",
+        "sizeGap": "3",
+        "sizeKeyThickness": "20",
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 3970,
+        "y": 1540,
+        "wires": []
+    },
+    {
+        "id": "87d66cceec0a12bc",
+        "type": "change",
+        "z": "cf449ce1322fd8eb",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "estado",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 3960,
+        "y": 1580,
+        "wires": [
+            [
+                "f55f1bd4897f6cf3"
+            ]
+        ]
+    },
+    {
+        "id": "f55f1bd4897f6cf3",
+        "type": "ui-text",
+        "z": "cf449ce1322fd8eb",
+        "group": "3f690bb5a526a246",
+        "order": 7,
+        "width": "5",
+        "height": "1",
+        "name": "Estado del Tanque",
+        "label": "Estado:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "className": "",
+        "x": 4150,
+        "y": 1580,
+        "wires": []
+    },
+    {
+        "id": "d985c8cacdb0b265",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Data Accumulation Node",
+        "func": "let lecturas = flow.get(\"lecturasVolumen\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual\nconst registro = {\n    tiempo: Date.now(),\n    volumen: msg.payload // Usar msg.payload directamente\n};\nlecturas.push(registro);\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nconst tiempoActual = Date.now();\nlecturas = lecturas.filter(r => (tiempoActual - r.tiempo) <= tiempoMaximo);\n\n// Guardar las lecturas actualizadas en el contexto del flujo\nflow.set(\"lecturasVolumen\", lecturas);\n\n// Pasar las lecturas completas al siguiente nodo para su procesamiento\nreturn { payload: lecturas };",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3110,
+        "y": 1340,
+        "wires": [
+            [
+                "3e9590f07b5a32b0"
+            ]
+        ]
+    },
+    {
+        "id": "6f4a0352520dec7a",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Deteccion Estado",
+        "func": "const volumenActual = msg.payload;\nconst volumenAnterior = context.get('volumenAnterior') || volumenActual;\nconst estadoAnterior = flow.get('estadoSistema') || 'Alimentación';\n\n// Umbrales y condiciones para detectar el cambio de estado\nconst umbralIncremento = 5; // Ajustar según la sensibilidad deseada\nconst deltaVolumen = volumenActual - volumenAnterior;\n\nlet estadoActual = estadoAnterior;\n\nif (estadoAnterior === 'Alimentación' && deltaVolumen >= umbralIncremento) {\n    estadoActual = 'Rellenado';\n} else if (estadoAnterior === 'Rellenado' && deltaVolumen <= -umbralIncremento) {\n    estadoActual = 'Alimentación';\n}\n\n// Actualizar variables de contexto\nflow.set('estadoSistema', estadoActual);\ncontext.set('volumenAnterior', volumenActual);\n\n// Pasar el estado actual en el mensaje\nmsg.estado = estadoActual;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2930,
+        "y": 2240,
+        "wires": [
+            [
+                "6428c45ad725b5c0"
+            ]
+        ]
+    },
+    {
+        "id": "6428c45ad725b5c0",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Acumulacion Datos",
+        "func": "const estadoSistema = flow.get('estadoSistema') || 'Alimentación';\n\nif (estadoSistema === 'Alimentación') {\n    let lecturas = flow.get('lecturasAlimentacion') || [];\n    const tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n    // Añadir nueva lectura\n    const registro = {\n        tiempo: Date.now(),\n        volumen: msg.payload\n    };\n    lecturas.push(registro);\n\n    // Eliminar lecturas antiguas\n    const tiempoActual = Date.now();\n    lecturas = lecturas.filter(r => (tiempoActual - r.tiempo) <= tiempoMaximo);\n\n    // Guardar lecturas actualizadas\n    flow.set('lecturasAlimentacion', lecturas);\n} else {\n    // Durante 'Rellenado', opcionalmente limpiar la cola\n    flow.set('lecturasAlimentacion', []);\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3170,
+        "y": 2240,
+        "wires": [
+            [
+                "80b965a12a448042"
+            ]
+        ]
+    },
+    {
+        "id": "80b965a12a448042",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Calculo flujo",
+        "func": "const estadoSistema = flow.get('estadoSistema') || 'Alimentación';\nlet ultimoFlujoValido = flow.get('ultimoFlujoValido') || 0;\nlet flujo = ultimoFlujoValido;\n\nif (estadoSistema === 'Alimentación') {\n    const lecturas = flow.get('lecturasAlimentacion') || [];\n\n    if (lecturas.length >= 2) {\n        const volumenInicial = lecturas[0].volumen;\n        const tiempoInicial = lecturas[0].tiempo;\n        const volumenFinal = lecturas[lecturas.length - 1].volumen;\n        const tiempoFinal = lecturas[lecturas.length - 1].tiempo;\n\n        const deltaVolumen = volumenFinal - volumenInicial;\n        const deltaTiempo = (tiempoFinal - tiempoInicial) / 1000; // en segundos\n\n        if (deltaTiempo > 0 && deltaVolumen < 0) {\n            flujo = -deltaVolumen / deltaTiempo;\n            ultimoFlujoValido = flujo;\n            flow.set('ultimoFlujoValido', ultimoFlujoValido);\n        }\n    }\n}\n\n// Pasar el flujo y el estado en el mensaje\nmsg.payload = flujo;\nmsg.estado = estadoSistema;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3370,
+        "y": 2240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "detectar-estado",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Detectar Estado",
+        "func": "const volumenActual = msg.payload;\nconst volumenAnterior = context.get('volumenAnterior') || volumenActual;\nconst estadoAnterior = flow.get('estadoSistema') || 'Alimentación';\n\n// Parámetros de detección\nconst umbralIncremento = 5; // Ajustar según el incremento típico durante rellenado\nconst umbralDecremento = -1; // Ajustar si es necesario\nconst deltaVolumen = volumenActual - volumenAnterior;\n\nlet estadoActual = estadoAnterior;\n\nif (estadoAnterior === 'Alimentación' && deltaVolumen >= umbralIncremento) {\n  estadoActual = 'Rellenado';\n} else if (estadoAnterior === 'Rellenado' && deltaVolumen <= umbralDecremento) {\n  estadoActual = 'Alimentación';\n}\n\n// Actualizar variables de contexto\nflow.set('estadoSistema', estadoActual);\ncontext.set('volumenAnterior', volumenActual);\n\n// Añadir estado al mensaje\nmsg.payload = {\n  volumen: volumenActual,\n  estado: estadoActual\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 3200,
+        "y": 2420,
+        "wires": [
+            [
+                "acumular-lecturas"
+            ]
+        ]
+    },
+    {
+        "id": "acumular-lecturas",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Acumular Lecturas",
+        "func": "const estadoSistema = msg.payload.estado;\nconst volumen = msg.payload.volumen;\n\nif (estadoSistema === 'Alimentación') {\n  let lecturas = flow.get('lecturasAlimentacion') || [];\n  const tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n  // Añadir nueva lectura\n  const registro = {\n    tiempo: Date.now(),\n    volumen: volumen\n  };\n  lecturas.push(registro);\n\n  // Eliminar lecturas antiguas\n  const tiempoActual = Date.now();\n  lecturas = lecturas.filter(r => (tiempoActual - r.tiempo) <= tiempoMaximo);\n\n  // Guardar lecturas actualizadas\n  flow.set('lecturasAlimentacion', lecturas);\n} else {\n  // Durante 'Rellenado', limpiar la cola\n  flow.set('lecturasAlimentacion', []);\n}\n\n// Pasar el mensaje al siguiente nodo\nmsg.payload = {\n  volumen: volumen,\n  estado: estadoSistema\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 3390,
+        "y": 2420,
+        "wires": [
+            [
+                "calcular-flujo"
+            ]
+        ]
+    },
+    {
+        "id": "calcular-flujo",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Calcular Flujo",
+        "func": "const estadoSistema = msg.payload.estado;\nlet ultimoFlujoValido = flow.get('ultimoFlujoValido') || 0;\nlet flujo = ultimoFlujoValido;\n\nif (estadoSistema === 'Alimentación') {\n  const lecturas = flow.get('lecturasAlimentacion') || [];\n\n  if (lecturas.length >= 2) {\n    const volumenInicial = lecturas[0].volumen;\n    const tiempoInicial = lecturas[0].tiempo;\n    const volumenFinal = lecturas[lecturas.length - 1].volumen;\n    const tiempoFinal = lecturas[lecturas.length - 1].tiempo;\n\n    const deltaVolumen = volumenFinal - volumenInicial;\n    const deltaTiempo = (tiempoFinal - tiempoInicial) / 1000; // en segundos\n\n    if (deltaTiempo > 0 && deltaVolumen < 0) {\n      flujo = -deltaVolumen / deltaTiempo;\n      ultimoFlujoValido = flujo;\n      flow.set('ultimoFlujoValido', ultimoFlujoValido);\n    } else {\n      // Si el volumen no disminuye, mantener el último flujo válido\n      flujo = ultimoFlujoValido;\n    }\n  } else {\n    // Si no hay suficientes lecturas, mantener el último flujo válido\n    flujo = ultimoFlujoValido;\n  }\n} else {\n  // Durante 'Rellenado', mantener el último flujo válido\n  flujo = ultimoFlujoValido;\n}\n\n// Preparar el mensaje de salida\nmsg.payload = flujo; // Flujo en unidades/segundo\nmsg.estado = estadoSistema;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3580,
+        "y": 2420,
+        "wires": [
+            [
+                "conversion-visualizacion"
+            ]
+        ]
+    },
+    {
+        "id": "conversion-visualizacion",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Conversión y Visualización",
+        "func": "// Factor de conversión de unidades a litros\nconst factorUnidadesALitros = 2.5; // Ajustar según corresponda\n\nlet flujoUnidadesPorSegundo = msg.payload; // Flujo en unidades/segundo\nlet estado = msg.estado;\n\n// Convertir flujo a litros/hora\nlet flujoLitrosPorHora = flujoUnidadesPorSegundo * 3600 * factorUnidadesALitros;\n\n// Redondear el flujo a un número entero\nlet flujoLitrosPorHoraEntero = Math.round(flujoLitrosPorHora);\n\n// Preparar el mensaje para el dashboard\nmsg.payload = flujoLitrosPorHoraEntero;\nmsg.estado = estado;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 3800,
+        "y": 2420,
+        "wires": [
+            [
+                "gauge-flujo",
+                "texto-estado"
+            ]
+        ]
+    },
+    {
+        "id": "gauge-flujo",
+        "type": "ui_gauge",
+        "z": "cf449ce1322fd8eb",
+        "name": "Flujo de Alimentación",
+        "group": "grupo-dashboard",
+        "order": 1,
+        "width": "6",
+        "height": "6",
+        "gtype": "gage",
+        "title": "Flujo de Alimentación",
+        "label": "L/h",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "10000",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 4080,
+        "y": 2360,
+        "wires": []
+    },
+    {
+        "id": "texto-estado",
+        "type": "ui_text",
+        "z": "cf449ce1322fd8eb",
+        "group": "grupo-dashboard",
+        "order": 2,
+        "width": "6",
+        "height": "1",
+        "name": "Estado del Sistema",
+        "label": "Estado:",
+        "format": "{{msg.estado}}",
+        "layout": "row-spread",
+        "x": 4070,
+        "y": 2460,
+        "wires": []
+    },
+    {
+        "id": "c0d0e4e250e9c0b5",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Flow Calculation Node",
+        "func": "const cola = msg.payload;\nlet flujo = 0;\n\nif (cola.length > 1) {\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0) {\n        flujo = Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600); // calcular flujo\n    }\n} else {\n    // Manejar el caso cuando no hay suficientes registros para calcular un flujo\n    flujo = \"Insuficientes datos para cálculo de flujo\";\n}\n\n// Devolver el valor del flujo\nreturn { payload: flujo };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3320,
+        "y": 1740,
+        "wires": [
+            [
+                "4138f1894cd9e4d1"
+            ]
+        ]
+    },
+    {
+        "id": "e1aa3f17b348bf37",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "Data Accumulation Node",
+        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload[0] // Asumiendo que el volumen viene en msg.payload como primer elemento del array\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3050,
+        "y": 1740,
+        "wires": [
+            [
+                "c0d0e4e250e9c0b5"
+            ]
+        ]
+    },
+    {
+        "id": "4138f1894cd9e4d1",
+        "type": "debug",
+        "z": "cf449ce1322fd8eb",
+        "name": "Flujo",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 3510,
+        "y": 1740,
+        "wires": []
+    },
+    {
+        "id": "267745c56dc84cc5",
+        "type": "Stackhero-InfluxDB-v2-write",
+        "z": "cf449ce1322fd8eb",
+        "server": "0e4567efc02703e6",
+        "name": "",
+        "x": 1790,
+        "y": 1200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5fa2c07418d9e6b2",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "F_influx_vol",
+        "func": "msg.payload = {\n    bucket: 'refinacion',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'MN-2A',\n                equipo_id: 'FA-02A',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                nivel_litros: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 1160,
+        "wires": [
+            [
+                "267745c56dc84cc5"
+            ]
+        ]
+    },
+    {
+        "id": "c33cf286f2958d01",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "F_influx_vol",
+        "func": "msg.payload = {\n    bucket: 'refinacion',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'MN-4',\n                equipo_id: 'FA-04',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                nivel_litros: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 1200,
+        "wires": [
+            [
+                "267745c56dc84cc5"
+            ]
+        ]
+    },
+    {
+        "id": "c03d24e75253d81b",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "F_influx_vol",
+        "func": "msg.payload = {\n    bucket: 'refinacion',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'MN-6B',\n                equipo_id: 'FA-06B',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                nivel_litros: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 1240,
+        "wires": [
+            [
+                "267745c56dc84cc5"
+            ]
+        ]
+    },
+    {
+        "id": "feb06b50b5103539",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "F_influx_vol",
+        "func": "msg.payload = {\n    bucket: 'refinacion',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'MN-6A',\n                equipo_id: 'FA-06A',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                nivel_litros: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 1280,
+        "wires": [
+            [
+                "267745c56dc84cc5"
+            ]
+        ]
+    },
+    {
+        "id": "3ccbf9397897d307",
+        "type": "function",
+        "z": "cf449ce1322fd8eb",
+        "name": "F_influx_vol",
+        "func": "msg.payload = {\n    bucket: 'refinacion',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'MN-9',\n                equipo_id: 'FA-09',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                nivel_litros: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 1320,
+        "wires": [
+            [
+                "267745c56dc84cc5"
+            ]
+        ]
     },
     {
         "id": "a5eba0d9354df196",
@@ -7195,7 +8618,7 @@
         "z": "7bdaf3fb66ecd941",
         "name": "Presion alimentacion",
         "group": "3f690bb5a526a246",
-        "order": 5,
+        "order": 6,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -7519,7 +8942,7 @@
         "type": "ui-text",
         "z": "7bdaf3fb66ecd941",
         "group": "9fa25027cf22c16b",
-        "order": 6,
+        "order": 2,
         "width": 0,
         "height": 0,
         "name": "Salida BA-01",
@@ -8652,7 +10075,7 @@
         "type": "ui-text",
         "z": "79b057876d37bdc0",
         "group": "9dee42aba81f471c",
-        "order": 6,
+        "order": 1,
         "width": "2",
         "height": "1",
         "name": "Salida Asfalto",
@@ -8754,7 +10177,7 @@
         "type": "ui-text",
         "z": "79b057876d37bdc0",
         "group": "9dee42aba81f471c",
-        "order": 6,
+        "order": 2,
         "width": "2",
         "height": "1",
         "name": "Salida HCD",
@@ -8855,7 +10278,7 @@
         "type": "ui-text",
         "z": "79b057876d37bdc0",
         "group": "9dee42aba81f471c",
-        "order": 6,
+        "order": 3,
         "width": "2",
         "height": "1",
         "name": "Entrada Residuo",
@@ -8956,7 +10379,7 @@
         "type": "ui-text",
         "z": "79b057876d37bdc0",
         "group": "9dee42aba81f471c",
-        "order": 6,
+        "order": 4,
         "width": "2",
         "height": "1",
         "name": "Salida Residuo",
@@ -10075,7 +11498,7 @@
         "d": true,
         "name": "Flujo COPE",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 15,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -10119,7 +11542,7 @@
         "group": "3f690bb5a526a246",
         "name": "Vol FA-02",
         "label": "Volumen FA-02",
-        "order": 2,
+        "order": 29,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -10761,7 +12184,7 @@
         "group": "3f690bb5a526a246",
         "name": "Vol FA-02 1",
         "label": "Volumen FA-02 1",
-        "order": 2,
+        "order": 28,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -10990,7 +12413,7 @@
         "z": "af01d920764bfaad",
         "name": "Flujo COPE 1",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 14,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -11171,7 +12594,7 @@
         "z": "af01d920764bfaad",
         "name": "Flujo COPE 2",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 13,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -11582,7 +13005,7 @@
         "group": "3f690bb5a526a246",
         "name": "Vol FA-02 2",
         "label": "Volumen FA-02 2",
-        "order": 2,
+        "order": 27,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -11640,7 +13063,7 @@
         "d": true,
         "name": "Flujo COPE 3",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 12,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -12064,7 +13487,7 @@
         "group": "3f690bb5a526a246",
         "name": "Vol FA-02 3",
         "label": "Volumen FA-02 3",
-        "order": 2,
+        "order": 26,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -12418,7 +13841,7 @@
         "z": "af01d920764bfaad",
         "name": "Flujo COPE 3",
         "group": "3f690bb5a526a246",
-        "order": 4,
+        "order": 5,
         "width": "5",
         "height": "4",
         "gtype": "gauge-half",
@@ -12520,7 +13943,7 @@
         "group": "3f690bb5a526a246",
         "name": "Vol FA-02 3",
         "label": "Volumen FA-02 3",
-        "order": 2,
+        "order": 3,
         "chartType": "bar",
         "category": "label",
         "categoryType": "property",
@@ -12946,6 +14369,1688 @@
         "libs": [],
         "x": 1840,
         "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0502e633eba4e6b5",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "update",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "update",
+        "payload": "",
+        "payloadType": "date",
+        "x": 750,
+        "y": 600,
+        "wires": [
+            [
+                "eaae8920921c0bc0"
+            ]
+        ]
+    },
+    {
+        "id": "1a6badeeca2e6142",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "next",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "next",
+        "payload": "",
+        "payloadType": "date",
+        "x": 760,
+        "y": 560,
+        "wires": [
+            [
+                "eaae8920921c0bc0"
+            ]
+        ]
+    },
+    {
+        "id": "a338b9b94f33bd81",
+        "type": "change",
+        "z": "74704056515d0eb7",
+        "name": "Advance queue",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "next",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 980,
+        "y": 680,
+        "wires": [
+            [
+                "eaae8920921c0bc0"
+            ]
+        ]
+    },
+    {
+        "id": "eaae8920921c0bc0",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Modbus Queue",
+        "func": "let resendifnoresposne = true; // resend the last message is no response is received\nlet resendinterval = 10; // resend last e message every x seconds\nlet online_threshold = 10; // Seconds between updates under which the device is considered online\nlet offline_threshold = 300; // Seconds between updates above which the device is considered offline\n\nlet notifmsg = null;\n\n// Check and make sure the incoming message has a topic\nif ((msg.topic===\"\")||(msg.topic===null)||(msg.topic===undefined)) {\n    node.status({fill:\"red\",shape:\"dot\",text:\"Topic missing\"});\n    return;\n}\n\nlet lastupdate = context.get(\"lastupdate\");\nlet state = context.get(\"state\") | 0;\nlet queue = context.get(\"queue\");\nlet queuecount = 0;\nif (queue === undefined) {\n    queue = [];\n} else {\n    if (Array.isArray(queue)) {\n        queuecount = queue.length;\n    } else {\n        queue = [];\n    }\n}\nlet current = new Date().getTime();\nlet send = false;\n\nswitch (msg.topic.toLowerCase()) {\n    case \"update\":\n        // Update the timer and statistics\n\n        if (lastupdate !== undefined) {\n            notifmsg = { \"topic\": \"Information\", \"payload\": {} };\n            current = current - lastupdate;\n            current = Math.floor(current / 1000);\n            notifmsg.payload.secondsincelastupdate = current;\n            var minute = Math.floor(current / 60);\n            var hour = Math.floor(minute / 60);\n            var day = Math.floor(hour / 24);\n            if (current > 24 * 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + day + \" days, \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60) {\n                notifmsg.payload.updatetext = \"Last update \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else {\n                notifmsg.payload.updatetext = \"Last update \" + current % 60 + \" seconds ago\";\n            }\n\n            // Resend last message if there is no response from the server\n            if (resendifnoresposne) {\n                if ((current>0) && (current % resendinterval===0)) {\n                    let lastmsg = context.get(\"lastmsg\");\n                    if ((lastmsg!==undefined) && (context.get(\"sent\"))) {\n                        notifmsg.payload.resend = true;\n                        if ((lastmsg.payload.fc === 1) || (lastmsg.payload.fc === 2) || (lastmsg.payload.fc === 3) || (lastmsg.payload.fc === 4)) {\n                            // this is a modbus read request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Read re-sent!\" });\n                            return [lastmsg, null, notifmsg];\n                        } else {\n                            // this is a modbus write request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Write re-sent!\" });\n                            return [null, lastmsg, notifmsg];\n                        }\n                    }\n                }\n            }\n\n            // Check for online state\n            if (state !== 1) {\n                if (current < online_threshold) {\n                    notifmsg.topic = \"Warning\";\n                    notifmsg.payload.text = \"Device is now online\";\n                    notifmsg.payload.statuschange = true;\n                    state = 1;\n                    context.set(\"state\", state);\n                }\n            } else {\n                if (current > offline_threshold) {\n                    notifmsg.topic = \"Error\";\n                    notifmsg.payload.text = \"Device is not transmitting\";\n                    notifmsg.payload.statuschange = true;\n                    state = 99;\n                    context.set(\"state\", state);\n                }\n            }\n            notifmsg.payload.state = state;\n            if (state===1) {\n                node.status({ fill: \"blue\", shape: \"ring\", text: queuecount+ \" | \"+notifmsg.payload.updatetext });\n            } else {\n                node.status({ fill: \"red\", shape: \"ring\", text: queuecount + \" | \" + notifmsg.payload.updatetext });\n            }\n            return [null, null, notifmsg];\n\n        } else {\n            node.status({ fill: \"grey\", shape: \"ring\", text: \"No data\" });\n        }\n        break;\n    case \"next\":\n        // Update the lastupdate counter\n        context.set(\"lastupdate\", current);\n        context.set(\"sent\", false);\n        send = true;\n        break;\n    case \"reset\":\n        context.set(\"queue\",[]);\n        context.set(\"sent\", false);\n        context.set(\"lastmsg\", undefined);\n        break;\n    default:\n        // The incoming message is a modbus request\n\n        // delete the last msg to prevent from being resent\n        // context.set(\"lastmsg\", undefined);\n\n        // Check if there is already a message in the queue with the same topic. \n        // If there is it needs to be deleted, because we only keep the last message.\n        for (let i=queue.length-1; i>=0; i--) {\n            if (queue[i].topic === msg.topic) {\n                queue.splice(i,1);\n            }\n        }\n\n        // Add the message to the end of the queue\n        queue.push(msg);\n        context.set(\"queue\",queue);\n\n        if (!context.get(\"sent\")) {\n            send = true;\n        }\n        node.status({ fill: \"green\", shape: \"dot\", text: queue.length });\n\n}\n\n// We need to send out a new message\nif (send) {\n\n    if (queue.length>0) {\n        // Get the older message from the array\n        let newmsg = queue[0];\n        // remove this message\n        queue.splice(0,1);\n        context.set(\"queue\",queue);\n        context.set(\"sent\", true);\n        context.set(\"lastmsg\", newmsg);\n\n        if ((newmsg.payload.fc === 1) || (newmsg.payload.fc === 2) || (newmsg.payload.fc === 3) || (newmsg.payload.fc === 4)) {\n            // this is a modbus read request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Read sent!\" });\n            return[newmsg,null,null];\n        } else {\n            // this is a modbus write request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Write sent!\" });\n            return [null, newmsg, null];\n        }\n        \n    }\n}\n",
+        "outputs": 3,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 800,
+        "wires": [
+            [
+                "7f800419c1e52e85"
+            ],
+            [],
+            [
+                "afcdd50649eed2e7"
+            ]
+        ],
+        "info": "# Modbus Queue\r\n\r\nThis node queueing read and write messages for modbus. Use this node if you are reading and writing the same device with many different requests. E.g. reading different coil/register intervals continously and also writing to the device at the same time.\r\n\r\nIt does a few things:\r\n- queues all messages arrive on the input port\r\n- based on the msg.topic, older messages of the same topci is ignored\r\n- sends out the oldest message and waits for the \r\n- monitors the time since last message and send out report on the output\r\n- handles online/offline status\r\n- resend the last message is response is not received in time\r\n\r\n## Input Data\r\n\r\n### payload\r\n\r\nThe payload should contain the data that gets sent to the flex-getter or flex-write node.\r\nTypical modbus read payload:\r\n`{\"value\":0,\"fc\":3,\"unitid\":1,\"address\":1000,\"quantity\":20}`\r\nTypical modbus write payload:\r\n`{\"value\":false,\"fc\":5,\"unitid\":1,\"address\":0,\"quantity\":1}`\r\n\r\n### topic\r\n\r\nEach message must contain a topic (any text), and this topic is used to identify the different read/write requests and delete any earlier request with the same topic if it still in the queueing\r\n\r\nThere are a few reserved topic for special function (for these payload is ignored):\r\n- reset: resets the queue and deleted any data collected so far\r\n- next: this is the message fed back from the flex getter/write node to indicate to this node that a new message can be sent out\r\n- update: this should be coming from a 1 second time to display the current queue count, time since the last update and online/offline status\r\n\r\n## Output ports\r\n\r\n### Port 1: flex getter\r\n\r\nThis output should be connected to a modbos-flex-getter and all the read requests will be sent out through this port\r\n\r\n### Port 2: flex write\r\n\r\nThis output should be connected to a modbos-flex-write and all the write requests will be sent out through this port\r\n\r\n### Port 3: status messages\r\n\r\nThis port outputs a status message for every update message (msg.topic=\"update\").\r\n\r\n- topic: \"Information\" for regular updates, \"Warning\": offline device is now back online, \"Error\": device is offline\r\n- payload.text: message like when the device gone offline, or back online\r\n- payload.updatetext: time passed since the last update (human readable format)\r\n- payload.secondsincelastupdate: number of seconds since the last update from the device\r\n- payload.statuschange: true if status is changed (gone offline, back online)\r\n- payload.state: 0: initial state, no data yet, 1: device online, 99: device offline\r\n\r\n## Node Settings\r\n\r\nChange the settings in the first 4 lines of the code to influence the behaviour. Explanation is in the code as comment."
+    },
+    {
+        "id": "308ac7d2538ba6ea",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "reset",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "update",
+        "payload": "",
+        "payloadType": "date",
+        "x": 750,
+        "y": 520,
+        "wires": [
+            [
+                "eaae8920921c0bc0"
+            ]
+        ]
+    },
+    {
+        "id": "7f592b098f864bda",
+        "type": "link in",
+        "z": "74704056515d0eb7",
+        "name": "link in 4",
+        "links": [],
+        "x": 795,
+        "y": 480,
+        "wires": [
+            [
+                "eaae8920921c0bc0"
+            ]
+        ]
+    },
+    {
+        "id": "afcdd50649eed2e7",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "update log",
+        "func": "if (msg.topic === \"Information\") {\n    // Registrar mensajes de información\n    node.log(\"Información: \" + msg.payload.updatetext);\n} else if (msg.topic === \"Warning\") {\n    // Registrar mensajes de advertencia\n    node.warn(\"Advertencia: \" + msg.payload.text);\n} else if (msg.topic === \"Error\") {\n    // Registrar mensajes de error\n    node.error(\"Error: \" + msg.payload.text);\n}\n\n// Puedes agregar lógica adicional para procesar otros campos del mensaje de estado\n// Por ejemplo, puedes verificar el valor de msg.payload.state para realizar acciones específicas\n// según el estado del dispositivo (en línea, fuera de línea, etc.)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1190,
+        "y": 820,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "95e5f9c582a90439",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 700,
+        "y": 1020,
+        "wires": [
+            [
+                "eaae8920921c0bc0",
+                "a83d1cd83b125058"
+            ]
+        ]
+    },
+    {
+        "id": "613943fe5e980714",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "calc_vol",
+        "func": "const valorCrudo = msg.payload[0];\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Mantener solo el valor numérico\nreturn msg;\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1710,
+        "y": 540,
+        "wires": [
+            [
+                "ddca8a648581fe9a",
+                "ea504d39213f42ef",
+                "86e7625a5533d30a"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "345d36f7dcef4a31",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Data Accumulation Node",
+        "func": "let cola = flow.get(\"colaLecturas\") || [];\nconst tiempoMaximo = 300000; // 5 minutos en milisegundos\n\n// Añadir nuevo registro con timestamp actual si no viene incluido en el mensaje\nconst tiempoRegistro = msg.payload.timestamp || Date.now();  // Usar timestamp del mensaje o el tiempo actual si no está disponible\ncola.push({\n    tiempo: tiempoRegistro,\n    volumen: msg.payload[0] // Asumiendo que el volumen viene en msg.payload como primer elemento del array\n});\n\n// Eliminar registros más antiguos que el tiempo máximo permitido\nlet tiempoActual = Date.now();\ncola = cola.filter(registro => (tiempoActual - registro.tiempo) <= tiempoMaximo);\n\n// Guardar la cola actualizada en el contexto del flujo\nflow.set(\"colaLecturas\", cola);\n\n// Pasar la cola completa al siguiente nodo para su procesamiento\nreturn { payload: cola };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1770,
+        "y": 420,
+        "wires": [
+            [
+                "3911bc6c5019bbc5"
+            ]
+        ]
+    },
+    {
+        "id": "3911bc6c5019bbc5",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Flow Calculation Node",
+        "func": "const cola = msg.payload;\nlet flujo = 0;\n\nif (cola.length > 1) {\n    const primerRegistro = cola[0];\n    const ultimoRegistro = cola[cola.length - 1];\n    const tiempoDiferencia = (ultimoRegistro.tiempo - primerRegistro.tiempo) / 1000; // en segundos\n\n    // Convertir los valores de volumen según la escala proporcionada\n    const volumenInicial = ((primerRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n    const volumenFinal = ((ultimoRegistro.volumen - 4000) / (20000 - 4000)) * (40000 - 0);\n\n    if (tiempoDiferencia > 0) {\n        flujo = Math.round(-((volumenFinal - volumenInicial) / tiempoDiferencia) * 3600); // calcular flujo\n    }\n} else {\n    // Manejar el caso cuando no hay suficientes registros para calcular un flujo\n    flujo = \"Insuficientes datos para cálculo de flujo\";\n}\n\n// Devolver el valor del flujo\nreturn { payload: flujo };\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1840,
+        "y": 360,
+        "wires": [
+            [
+                "20acb7ba3945ec47",
+                "2a87db6f288bb71e",
+                "90bd649e44d8ca8d"
+            ]
+        ]
+    },
+    {
+        "id": "20acb7ba3945ec47",
+        "type": "debug",
+        "z": "74704056515d0eb7",
+        "name": "Flujo COPE",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2170,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "22bb93e097cbd52f",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "calc_presion",
+        "func": "const valorADCMin = 4000;\nconst valorADCMax = 20000;\nconst valorMin = 0;\nconst valorMax = 10.1972;\n\nconst valorADC = msg.payload[0];\nconst valorPresion = ((valorADC - valorADCMin) / (valorADCMax - valorADCMin)) * (valorMax - valorMin) + valorMin;\n\nmsg.payload = valorPresion.toFixed(4);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1720,
+        "y": 700,
+        "wires": [
+            [
+                "1bfd84a6d3c422e2",
+                "a9c4396dbb9c7e98"
+            ]
+        ]
+    },
+    {
+        "id": "7f800419c1e52e85",
+        "type": "modbus-flex-getter",
+        "z": "74704056515d0eb7",
+        "name": "ADC_1",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "logIOActivities": false,
+        "server": "4327e35470e78204",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 1200,
+        "y": 760,
+        "wires": [
+            [
+                "a338b9b94f33bd81",
+                "3b4b0ba541ee769a"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "3b4b0ba541ee769a",
+        "type": "switch",
+        "z": "74704056515d0eb7",
+        "name": "ADC_1 Registers",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "read_ADC1_AI0",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC1_AI1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC1_AI2",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC1_AI3",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 1430,
+        "y": 740,
+        "wires": [
+            [
+                "22bb93e097cbd52f"
+            ],
+            [
+                "613943fe5e980714",
+                "345d36f7dcef4a31"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "2a87db6f288bb71e",
+        "type": "ui-gauge",
+        "z": "74704056515d0eb7",
+        "name": "Flujo COPE",
+        "group": "3f690bb5a526a246",
+        "order": 5,
+        "width": "5",
+        "height": "4",
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Flujo COPE",
+        "units": "L/h",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ea5353"
+            },
+            {
+                "from": "4000",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "7500",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "10000",
+        "sizeThickness": "26",
+        "sizeGap": "3",
+        "sizeKeyThickness": "20",
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 2170,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "6c5dfc1ca7db76ba",
+        "type": "ui-chart",
+        "z": "74704056515d0eb7",
+        "group": "3f690bb5a526a246",
+        "name": "Volumen FA-02",
+        "label": "Volumen FA-02",
+        "order": 3,
+        "chartType": "bar",
+        "category": "label",
+        "categoryType": "property",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "property",
+        "xAxisType": "category",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "yAxisLabel": "",
+        "yAxisProperty": "value",
+        "ymin": "0",
+        "ymax": "40000",
+        "action": "replace",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": false,
+        "removeOlder": 1,
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#227dbf",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "2",
+        "height": "5",
+        "className": "",
+        "x": 2280,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ddca8a648581fe9a",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "formato_ui",
+        "func": "msg.payload = {\n    value: msg.payload,\n    label: msg.payload + \" Litros\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2110,
+        "y": 520,
+        "wires": [
+            [
+                "6c5dfc1ca7db76ba"
+            ]
+        ]
+    },
+    {
+        "id": "1bfd84a6d3c422e2",
+        "type": "ui-gauge",
+        "z": "74704056515d0eb7",
+        "name": "Presion alimentacion",
+        "group": "3f690bb5a526a246",
+        "order": 6,
+        "width": "5",
+        "height": "4",
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Presión Alimentación",
+        "units": "Kg/cm2",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ea5353"
+            },
+            {
+                "from": "4",
+                "color": "#5cd65c"
+            },
+            {
+                "from": "6",
+                "color": "#ea5353"
+            }
+        ],
+        "min": 0,
+        "max": "10",
+        "sizeThickness": "26",
+        "sizeGap": "3",
+        "sizeKeyThickness": "20",
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 2260,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "ea504d39213f42ef",
+        "type": "debug",
+        "z": "74704056515d0eb7",
+        "name": "debug 10",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1880,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "90d2fc7a000fb041",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "inject1",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 830,
+        "y": 360,
+        "wires": [
+            [
+                "027f7689047e0e8a"
+            ]
+        ]
+    },
+    {
+        "id": "4f0bce8d3f026ec5",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "inject1",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 830,
+        "y": 400,
+        "wires": [
+            [
+                "dc445e71217461ff"
+            ]
+        ]
+    },
+    {
+        "id": "027f7689047e0e8a",
+        "type": "change",
+        "z": "74704056515d0eb7",
+        "name": "set flow.flags",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1010,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dc445e71217461ff",
+        "type": "change",
+        "z": "74704056515d0eb7",
+        "name": "set flow.registers",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1030,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ce9f60654f981624",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "ADC_1_AI0",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "read_ADC1_AI0",
+        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":0,\"quantity\":1}",
+        "payloadType": "json",
+        "x": 710,
+        "y": 680,
+        "wires": [
+            [
+                "eaae8920921c0bc0"
+            ]
+        ]
+    },
+    {
+        "id": "880a16c33fee5041",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "ADC_1_AI1",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "read_ADC1_AI1",
+        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":1,\"quantity\":1}",
+        "payloadType": "json",
+        "x": 710,
+        "y": 720,
+        "wires": [
+            [
+                "eaae8920921c0bc0"
+            ]
+        ]
+    },
+    {
+        "id": "d096ce9e59e956cc",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "ADC_1_AI2",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "read_ADC1_AI2",
+        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":2,\"quantity\":1}",
+        "payloadType": "json",
+        "x": 710,
+        "y": 760,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0863b1e09e85b8c7",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "ADC_2_AI3",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "read_ADC2_AI3",
+        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":2,\"quantity\":1}",
+        "payloadType": "json",
+        "x": 710,
+        "y": 800,
+        "wires": [
+            [
+                "a83d1cd83b125058"
+            ]
+        ]
+    },
+    {
+        "id": "b70542d672f85b1c",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Format temp",
+        "func": "let temperature = msg.payload;\nmsg.payload = temperature + \"°C\"; // Añade la unidad °C al número\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2030,
+        "y": 860,
+        "wires": [
+            [
+                "99242f9a541a2f96"
+            ]
+        ]
+    },
+    {
+        "id": "34842db4e547d5cc",
+        "type": "ui-text",
+        "z": "74704056515d0eb7",
+        "group": "c589c5821e6c852e",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "name": "Entrada BA-01",
+        "label": "Entrada BA-01",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "style": true,
+        "font": "Helvetica, sans-serif",
+        "fontSize": 16,
+        "color": "#717171",
+        "className": "",
+        "x": 2220,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "2b78d3124ad8dade",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Format temp",
+        "func": "let temperature = msg.payload;\nmsg.payload = temperature + \"°C\"; // Añade la unidad °C al número\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2030,
+        "y": 780,
+        "wires": [
+            [
+                "34842db4e547d5cc"
+            ]
+        ]
+    },
+    {
+        "id": "99242f9a541a2f96",
+        "type": "ui-text",
+        "z": "74704056515d0eb7",
+        "group": "c589c5821e6c852e",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "Salida BA-01",
+        "label": "Salida BA-01",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "style": true,
+        "font": "Helvetica, sans-serif",
+        "fontSize": 16,
+        "color": "#717171",
+        "className": "",
+        "x": 2230,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "bb6c27eb0f802f65",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "calc_temp",
+        "func": "const valorADCMin = 4000;\nconst valorADCMax = 20000;\nconst valorMin = 0;\nconst valorMax = 500;\n\nconst valorADC = msg.payload[0];\nconst valorTemperatura = ((valorADC - valorADCMin) / (valorADCMax - valorADCMin)) * (valorMax - valorMin) + valorMin;\n\nmsg.payload = Math.round(valorTemperatura);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1750,
+        "y": 800,
+        "wires": [
+            [
+                "2b78d3124ad8dade",
+                "2370bafee0873276"
+            ]
+        ]
+    },
+    {
+        "id": "2b8e344986950762",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "calc_temp",
+        "func": "const valorADCMin = 4000;\nconst valorADCMax = 20000;\nconst valorMin = 0;\nconst valorMax = 1300;\n\nconst valorADC = msg.payload[0];\nconst valorTemperatura = ((valorADC - valorADCMin) / (valorADCMax - valorADCMin)) * (valorMax - valorMin) + valorMin;\n\nmsg.payload = Math.round(valorTemperatura);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1750,
+        "y": 880,
+        "wires": [
+            [
+                "b70542d672f85b1c",
+                "f9b60911a2646944"
+            ]
+        ]
+    },
+    {
+        "id": "ea40497b8740fe84",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "ADC_2_AI4",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "read_ADC2_AI4",
+        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":0,\"quantity\":1}",
+        "payloadType": "json",
+        "x": 710,
+        "y": 840,
+        "wires": [
+            [
+                "a83d1cd83b125058"
+            ]
+        ]
+    },
+    {
+        "id": "cd20fabb1ba5fcc0",
+        "type": "modbus-flex-getter",
+        "z": "74704056515d0eb7",
+        "name": "ADC_2",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "logIOActivities": false,
+        "server": "d41506ab16d7ff6d",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 1200,
+        "y": 1000,
+        "wires": [
+            [
+                "76ee318320109608",
+                "f508da143d31bfd2"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "76ee318320109608",
+        "type": "change",
+        "z": "74704056515d0eb7",
+        "name": "Advance queue",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "next",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1060,
+        "y": 1100,
+        "wires": [
+            [
+                "a83d1cd83b125058"
+            ]
+        ]
+    },
+    {
+        "id": "efc13510cebd6541",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "ADC_1_AI5",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "read_ADC1_AI5",
+        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":6,\"quantity\":1}",
+        "payloadType": "json",
+        "x": 710,
+        "y": 880,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "eec60e8f57846ab5",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "ADC_1_AI6",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "read_ADC1_AI8",
+        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":7,\"quantity\":1}",
+        "payloadType": "json",
+        "x": 710,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8046857764fa4d08",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "ADC_1_AI7",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "read_ADC1_AI8",
+        "payload": "{\"value\":0,\"fc\":4,\"unitid\":1,\"address\":8,\"quantity\":1}",
+        "payloadType": "json",
+        "x": 710,
+        "y": 960,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f508da143d31bfd2",
+        "type": "switch",
+        "z": "74704056515d0eb7",
+        "name": "ADC_2 Registers",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "read_ADC2_AI1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC2_AI2",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC2_AI3",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC2_AI4",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC2_AI5",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC2_AI6",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC2_AI7",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "read_ADC2_AI8",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 8,
+        "x": 1430,
+        "y": 860,
+        "wires": [
+            [],
+            [],
+            [
+                "2b8e344986950762"
+            ],
+            [
+                "bb6c27eb0f802f65"
+            ],
+            [],
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "a83d1cd83b125058",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Modbus Queue",
+        "func": "let resendifnoresposne = true; // resend the last message is no response is received\nlet resendinterval = 10; // resend last e message every x seconds\nlet online_threshold = 10; // Seconds between updates under which the device is considered online\nlet offline_threshold = 300; // Seconds between updates above which the device is considered offline\n\nlet notifmsg = null;\n\n// Check and make sure the incoming message has a topic\nif ((msg.topic===\"\")||(msg.topic===null)||(msg.topic===undefined)) {\n    node.status({fill:\"red\",shape:\"dot\",text:\"Topic missing\"});\n    return;\n}\n\nlet lastupdate = context.get(\"lastupdate\");\nlet state = context.get(\"state\") | 0;\nlet queue = context.get(\"queue\");\nlet queuecount = 0;\nif (queue === undefined) {\n    queue = [];\n} else {\n    if (Array.isArray(queue)) {\n        queuecount = queue.length;\n    } else {\n        queue = [];\n    }\n}\nlet current = new Date().getTime();\nlet send = false;\n\nswitch (msg.topic.toLowerCase()) {\n    case \"update\":\n        // Update the timer and statistics\n\n        if (lastupdate !== undefined) {\n            notifmsg = { \"topic\": \"Information\", \"payload\": {} };\n            current = current - lastupdate;\n            current = Math.floor(current / 1000);\n            notifmsg.payload.secondsincelastupdate = current;\n            var minute = Math.floor(current / 60);\n            var hour = Math.floor(minute / 60);\n            var day = Math.floor(hour / 24);\n            if (current > 24 * 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + day + \" days, \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60 * 60) {\n                notifmsg.payload.updatetext = \"Last update \" + hour % 24 + \" hours, \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else if (current > 60) {\n                notifmsg.payload.updatetext = \"Last update \" + minute % 60 + \" minutes, \" + current % 60 + \" seconds ago\";\n            } else {\n                notifmsg.payload.updatetext = \"Last update \" + current % 60 + \" seconds ago\";\n            }\n\n            // Resend last message if there is no response from the server\n            if (resendifnoresposne) {\n                if ((current>0) && (current % resendinterval===0)) {\n                    let lastmsg = context.get(\"lastmsg\");\n                    if ((lastmsg!==undefined) && (context.get(\"sent\"))) {\n                        notifmsg.payload.resend = true;\n                        if ((lastmsg.payload.fc === 1) || (lastmsg.payload.fc === 2) || (lastmsg.payload.fc === 3) || (lastmsg.payload.fc === 4)) {\n                            // this is a modbus read request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Read re-sent!\" });\n                            return [lastmsg, null, notifmsg];\n                        } else {\n                            // this is a modbus write request\n                            node.status({ fill: \"green\", shape: \"dot\", text: \"Write re-sent!\" });\n                            return [null, lastmsg, notifmsg];\n                        }\n                    }\n                }\n            }\n\n            // Check for online state\n            if (state !== 1) {\n                if (current < online_threshold) {\n                    notifmsg.topic = \"Warning\";\n                    notifmsg.payload.text = \"Device is now online\";\n                    notifmsg.payload.statuschange = true;\n                    state = 1;\n                    context.set(\"state\", state);\n                }\n            } else {\n                if (current > offline_threshold) {\n                    notifmsg.topic = \"Error\";\n                    notifmsg.payload.text = \"Device is not transmitting\";\n                    notifmsg.payload.statuschange = true;\n                    state = 99;\n                    context.set(\"state\", state);\n                }\n            }\n            notifmsg.payload.state = state;\n            if (state===1) {\n                node.status({ fill: \"blue\", shape: \"ring\", text: queuecount+ \" | \"+notifmsg.payload.updatetext });\n            } else {\n                node.status({ fill: \"red\", shape: \"ring\", text: queuecount + \" | \" + notifmsg.payload.updatetext });\n            }\n            return [null, null, notifmsg];\n\n        } else {\n            node.status({ fill: \"grey\", shape: \"ring\", text: \"No data\" });\n        }\n        break;\n    case \"next\":\n        // Update the lastupdate counter\n        context.set(\"lastupdate\", current);\n        context.set(\"sent\", false);\n        send = true;\n        break;\n    case \"reset\":\n        context.set(\"queue\",[]);\n        context.set(\"sent\", false);\n        context.set(\"lastmsg\", undefined);\n        break;\n    default:\n        // The incoming message is a modbus request\n\n        // delete the last msg to prevent from being resent\n        // context.set(\"lastmsg\", undefined);\n\n        // Check if there is already a message in the queue with the same topic. \n        // If there is it needs to be deleted, because we only keep the last message.\n        for (let i=queue.length-1; i>=0; i--) {\n            if (queue[i].topic === msg.topic) {\n                queue.splice(i,1);\n            }\n        }\n\n        // Add the message to the end of the queue\n        queue.push(msg);\n        context.set(\"queue\",queue);\n\n        if (!context.get(\"sent\")) {\n            send = true;\n        }\n        node.status({ fill: \"green\", shape: \"dot\", text: queue.length });\n\n}\n\n// We need to send out a new message\nif (send) {\n\n    if (queue.length>0) {\n        // Get the older message from the array\n        let newmsg = queue[0];\n        // remove this message\n        queue.splice(0,1);\n        context.set(\"queue\",queue);\n        context.set(\"sent\", true);\n        context.set(\"lastmsg\", newmsg);\n\n        if ((newmsg.payload.fc === 1) || (newmsg.payload.fc === 2) || (newmsg.payload.fc === 3) || (newmsg.payload.fc === 4)) {\n            // this is a modbus read request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Read sent!\" });\n            return[newmsg,null,null];\n        } else {\n            // this is a modbus write request\n            node.status({ fill: \"green\", shape: \"dot\", text: \"Write sent!\" });\n            return [null, newmsg, null];\n        }\n        \n    }\n}\n",
+        "outputs": 3,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 1020,
+        "wires": [
+            [
+                "cd20fabb1ba5fcc0"
+            ],
+            [],
+            [
+                "2c34a30ae2648bb3"
+            ]
+        ],
+        "info": "# Modbus Queue\r\n\r\nThis node queueing read and write messages for modbus. Use this node if you are reading and writing the same device with many different requests. E.g. reading different coil/register intervals continously and also writing to the device at the same time.\r\n\r\nIt does a few things:\r\n- queues all messages arrive on the input port\r\n- based on the msg.topic, older messages of the same topci is ignored\r\n- sends out the oldest message and waits for the \r\n- monitors the time since last message and send out report on the output\r\n- handles online/offline status\r\n- resend the last message is response is not received in time\r\n\r\n## Input Data\r\n\r\n### payload\r\n\r\nThe payload should contain the data that gets sent to the flex-getter or flex-write node.\r\nTypical modbus read payload:\r\n`{\"value\":0,\"fc\":3,\"unitid\":1,\"address\":1000,\"quantity\":20}`\r\nTypical modbus write payload:\r\n`{\"value\":false,\"fc\":5,\"unitid\":1,\"address\":0,\"quantity\":1}`\r\n\r\n### topic\r\n\r\nEach message must contain a topic (any text), and this topic is used to identify the different read/write requests and delete any earlier request with the same topic if it still in the queueing\r\n\r\nThere are a few reserved topic for special function (for these payload is ignored):\r\n- reset: resets the queue and deleted any data collected so far\r\n- next: this is the message fed back from the flex getter/write node to indicate to this node that a new message can be sent out\r\n- update: this should be coming from a 1 second time to display the current queue count, time since the last update and online/offline status\r\n\r\n## Output ports\r\n\r\n### Port 1: flex getter\r\n\r\nThis output should be connected to a modbos-flex-getter and all the read requests will be sent out through this port\r\n\r\n### Port 2: flex write\r\n\r\nThis output should be connected to a modbos-flex-write and all the write requests will be sent out through this port\r\n\r\n### Port 3: status messages\r\n\r\nThis port outputs a status message for every update message (msg.topic=\"update\").\r\n\r\n- topic: \"Information\" for regular updates, \"Warning\": offline device is now back online, \"Error\": device is offline\r\n- payload.text: message like when the device gone offline, or back online\r\n- payload.updatetext: time passed since the last update (human readable format)\r\n- payload.secondsincelastupdate: number of seconds since the last update from the device\r\n- payload.statuschange: true if status is changed (gone offline, back online)\r\n- payload.state: 0: initial state, no data yet, 1: device online, 99: device offline\r\n\r\n## Node Settings\r\n\r\nChange the settings in the first 4 lines of the code to influence the behaviour. Explanation is in the code as comment."
+    },
+    {
+        "id": "2c34a30ae2648bb3",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "update log",
+        "func": "if (msg.topic === \"Information\") {\n    // Registrar mensajes de información\n    node.log(\"Información: \" + msg.payload.updatetext);\n} else if (msg.topic === \"Warning\") {\n    // Registrar mensajes de advertencia\n    node.warn(\"Advertencia: \" + msg.payload.text);\n} else if (msg.topic === \"Error\") {\n    // Registrar mensajes de error\n    node.error(\"Error: \" + msg.payload.text);\n}\n\n// Puedes agregar lógica adicional para procesar otros campos del mensaje de estado\n// Por ejemplo, puedes verificar el valor de msg.payload.state para realizar acciones específicas\n// según el estado del dispositivo (en línea, fuera de línea, etc.)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1190,
+        "y": 1040,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "244f1d1ef219ac5d",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "update",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "update",
+        "payload": "",
+        "payloadType": "date",
+        "x": 700,
+        "y": 1320,
+        "wires": [
+            [
+                "a83d1cd83b125058"
+            ]
+        ]
+    },
+    {
+        "id": "1efd22ba333bd99d",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "next",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "next",
+        "payload": "",
+        "payloadType": "date",
+        "x": 690,
+        "y": 1280,
+        "wires": [
+            [
+                "a83d1cd83b125058"
+            ]
+        ]
+    },
+    {
+        "id": "ec315777d0cc2435",
+        "type": "inject",
+        "z": "74704056515d0eb7",
+        "name": "reset",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "update",
+        "payload": "",
+        "payloadType": "date",
+        "x": 690,
+        "y": 1240,
+        "wires": [
+            [
+                "a83d1cd83b125058"
+            ]
+        ]
+    },
+    {
+        "id": "f06eacbce376dc60",
+        "type": "link in",
+        "z": "74704056515d0eb7",
+        "name": "link in 7",
+        "links": [],
+        "x": 655,
+        "y": 1200,
+        "wires": [
+            [
+                "a83d1cd83b125058"
+            ]
+        ]
+    },
+    {
+        "id": "f55a2d100bb8036b",
+        "type": "debug",
+        "z": "74704056515d0eb7",
+        "name": "debug 35",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1030,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "4d2de13b1725940f",
+        "type": "Stackhero-InfluxDB-v2-write",
+        "z": "74704056515d0eb7",
+        "d": true,
+        "server": "a1b3d7fc83d5c6f6",
+        "name": "DB",
+        "x": 2590,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "90bd649e44d8ca8d",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "F_influx_flujo",
+        "func": "if (isNaN(msg.payload)) {\n    node.error(\"Valor de flujo no es un número\", msg);\n    return null;\n}\nmsg.payload = {\n    bucket: 'sensores2',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'MF-1.1',\n                equipo_id: 'FA-02A',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                flujo_lh: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2170,
+        "y": 260,
+        "wires": [
+            [
+                "4d2de13b1725940f"
+            ]
+        ]
+    },
+    {
+        "id": "86e7625a5533d30a",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "F_influx_vol",
+        "func": "if (isNaN(msg.payload)) {\n    node.error(\"Valor de nivel litros no es un número\", msg);\n    return null;\n}\nmsg.payload = {\n    bucket: 'sensores2',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'MN-2.1',\n                equipo_id: 'FA-02A',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                nivel_litros: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2090,
+        "y": 620,
+        "wires": [
+            [
+                "4d2de13b1725940f"
+            ]
+        ]
+    },
+    {
+        "id": "a9c4396dbb9c7e98",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "F_influx_presion",
+        "func": "if (isNaN(msg.payload)) {\n    node.error(\"Valor de presión no es un número\", msg);\n    return null;\n}\nmsg.payload = {\n    bucket: 'sensores2',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'MP-1.1',\n                equipo_id: 'FA-02A',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                presion_kg: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2100,
+        "y": 660,
+        "wires": [
+            [
+                "4d2de13b1725940f"
+            ]
+        ]
+    },
+    {
+        "id": "2370bafee0873276",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "F_influx_temp",
+        "func": "if (isNaN(msg.payload)) {\n    node.error(\"Valor de temperatura no es un número\", msg);\n    return null;\n}\nmsg.payload = {\n    bucket: 'sensores2',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'ST-2.1',\n                equipo_id: 'ent-BA-01',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                temperatura_c: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2380,
+        "y": 740,
+        "wires": [
+            [
+                "4d2de13b1725940f"
+            ]
+        ]
+    },
+    {
+        "id": "f9b60911a2646944",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "F_influx_temp",
+        "func": "if (isNaN(msg.payload)) {\n    node.error(\"Valor de temperatura no es un número\", msg);\n    return null;\n}\nmsg.payload = {\n    bucket: 'sensores2',\n    precision: 'ms',\n    data: [\n        {\n            measurement: 'ParametrosProceso',\n            tags: {\n                sensor_id: 'ST-2.2',\n                equipo_id: 'sal-BA-01',\n                ubicacion: 'destilados'\n            },\n            fields: {\n                temperatura_c: msg.payload\n            },\n            timestamp: Date.now()\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2460,
+        "y": 900,
+        "wires": [
+            [
+                "4d2de13b1725940f"
+            ]
+        ]
+    },
+    {
+        "id": "f3964591c6f62ae3",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Calculate Volume",
+        "func": "const valorCrudo = msg.payload[0];\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);  // Keep only the numeric value\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1490,
+        "y": 1160,
+        "wires": [
+            [
+                "a9c8b2d9a9dfe563"
+            ]
+        ]
+    },
+    {
+        "id": "a9c8b2d9a9dfe563",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Alert Logic",
+        "func": "const volume = msg.payload;\nlet alertMessage = null;\nlet alertLevel = null;\n\nif (volume >= 38000) {\n    alertLevel = \"Critical Danger Alert\";\n    alertMessage = `Critical Danger: Tank overfill imminent at ${volume} liters.`;\n} else if (volume >= 35000) {\n    alertLevel = \"High Level Warning\";\n    alertMessage = `Warning: Tank volume high at ${volume} liters.`;\n} else if (volume <= 3000) {\n    alertLevel = \"Very Low Level Alert\";\n    alertMessage = `Alert: Tank volume critically low at ${volume} liters.`;\n} else if (volume <= 7000) {\n    alertLevel = \"Low Volume Warning\";\n    alertMessage = `Warning: Tank volume low at ${volume} liters.`;\n} else {\n    // No alert\n    return null;\n}\n\n// Construct the alert message\nmsg.payload = {\n    volume: volume,\n    alertLevel: alertLevel,\n    alertMessage: alertMessage\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1690,
+        "y": 1160,
+        "wires": [
+            [
+                "c56ed5c7e5c0cf7a",
+                "577856585c75f876"
+            ]
+        ]
+    },
+    {
+        "id": "c56ed5c7e5c0cf7a",
+        "type": "debug",
+        "z": "74704056515d0eb7",
+        "name": "Debug Alert",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 1890,
+        "y": 1120,
+        "wires": []
+    },
+    {
+        "id": "577856585c75f876",
+        "type": "switch",
+        "z": "74704056515d0eb7",
+        "name": "Alert Level Switch",
+        "property": "payload.alertLevel",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Critical Danger Alert",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "High Level Warning",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Very Low Level Alert",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Low Volume Warning",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 1910,
+        "y": 1200,
+        "wires": [
+            [
+                "c41c6100577bf3b0"
+            ],
+            [
+                "c41c6100577bf3b0"
+            ],
+            [
+                "c41c6100577bf3b0"
+            ],
+            [
+                "c41c6100577bf3b0"
+            ]
+        ]
+    },
+    {
+        "id": "c41c6100577bf3b0",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Send Alert",
+        "func": "// Here you can define how to send the alert, e.g., email, SMS, MQTT, etc.\n// For demonstration, we'll log it to the debug window.\n\n// Example: Send Email\n// msg.to = \"operator@example.com\";\n// msg.subject = msg.payload.alertLevel;\n// msg.payload = msg.payload.alertMessage;\n// return msg;\n\n// For now, just output to debug\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2110,
+        "y": 1200,
+        "wires": [
+            [
+                "ce2778671f894afb"
+            ]
+        ]
+    },
+    {
+        "id": "ce2778671f894afb",
+        "type": "debug",
+        "z": "74704056515d0eb7",
+        "name": "Alert Output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 2290,
+        "y": 1200,
+        "wires": []
+    },
+    {
+        "id": "c98d29923810f8a4",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Calculate Volume",
+        "func": "const valorCrudo = msg.payload[0];\nconst valorLitros = ((valorCrudo - 4000) / (20000 - 4000)) * (40000 - 0);\nmsg.payload = Math.round(valorLitros);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1410,
+        "y": 1420,
+        "wires": [
+            [
+                "e3c0d0ab5c3b1b0f"
+            ]
+        ]
+    },
+    {
+        "id": "e3c0d0ab5c3b1b0f",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Alert Logic",
+        "func": "const volume = msg.payload;\nlet alertMessage = null;\nlet alertLevel = null;\n\nif (volume >= 38000) {\n    alertLevel = \"Critical Danger Alert\";\n    alertMessage = `Critical Danger: Tank overfill imminent at ${volume} liters.`;\n} else if (volume >= 35000) {\n    alertLevel = \"High Level Warning\";\n    alertMessage = `Warning: Tank volume high at ${volume} liters.`;\n} else if (volume <= 3000) {\n    alertLevel = \"Very Low Level Alert\";\n    alertMessage = `Alert: Tank volume critically low at ${volume} liters.`;\n} else if (volume <= 7000) {\n    alertLevel = \"Low Volume Warning\";\n    alertMessage = `Warning: Tank volume low at ${volume} liters.`;\n} else {\n    // No alert\n    return null;\n}\n\nmsg.payload = {\n    volume: volume,\n    alertLevel: alertLevel,\n    alertMessage: alertMessage\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1610,
+        "y": 1420,
+        "wires": [
+            [
+                "4d8e9c6a3f5b2a1c"
+            ]
+        ]
+    },
+    {
+        "id": "4d8e9c6a3f5b2a1c",
+        "type": "switch",
+        "z": "74704056515d0eb7",
+        "name": "Alert Level Switch",
+        "property": "payload.alertLevel",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Critical Danger Alert",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "High Level Warning",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Very Low Level Alert",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Low Volume Warning",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 1830,
+        "y": 1420,
+        "wires": [
+            [
+                "d5b1c2a3e4f56789"
+            ],
+            [
+                "d5b1c2a3e4f56789"
+            ],
+            [
+                "d5b1c2a3e4f56789"
+            ],
+            [
+                "d5b1c2a3e4f56789"
+            ]
+        ]
+    },
+    {
+        "id": "d5b1c2a3e4f56789",
+        "type": "function",
+        "z": "74704056515d0eb7",
+        "name": "Send Alert",
+        "func": "// Email configuration\nvar msg1 = {};\nmsg1.to = \"operator@example.com\";\nmsg1.topic = msg.payload.alertLevel;\nmsg1.payload = msg.payload.alertMessage;\n\n// Telegram configuration\nvar msg2 = {};\nmsg2.payload = {\n    chatId: YOUR_CHAT_ID,\n    type: \"message\",\n    content: msg.payload.alertMessage\n};\n\nreturn [msg1, msg2];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 1,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2030,
+        "y": 1420,
+        "wires": [
+            [
+                "email_node_id"
+            ],
+            [
+                "2b1ff1a0eff593fa"
+            ]
+        ]
+    },
+    {
+        "id": "email_node_id",
+        "type": "e-mail",
+        "z": "74704056515d0eb7",
+        "server": "127.0.0.1",
+        "port": "1025",
+        "secure": false,
+        "tls": false,
+        "name": "",
+        "dname": "Email Alert",
+        "x": 2270,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "2b1ff1a0eff593fa",
+        "type": "telegram client sender",
+        "z": "74704056515d0eb7",
+        "name": "",
+        "bot": "",
+        "x": 2240,
+        "y": 1440,
         "wires": [
             []
         ]
