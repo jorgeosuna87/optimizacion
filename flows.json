@@ -10642,7 +10642,7 @@
         "type": "function",
         "z": "79b057876d37bdc0",
         "name": "Preparar alerta Whin",
-        "func": "msg.method = \"POST\";\nmsg.url = \"https://whin2.p.rapidapi.com/send2group\";\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'x-rapidapi-host': \"whin2.p.rapidapi.com\",\n    'x-rapidapi-key': '4fd095e525msh99b661699421a28p1b997ejsn4a6f974bbf31'\n};\nmsg.payload = {\n    \"gid\": \"120363337404279077\",\n    \"text\": `ALERTA: Temperatura alta en Salida HCD. Temperatura actual: ${msg.payload.temperature}°C`\n};\nreturn msg;",
+        "func": "msg.method = \"POST\";\nmsg.url = \"https://whin2.p.rapidapi.com/send\";\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'x-rapidapi-host': \"whin2.p.rapidapi.com\",\n    'x-rapidapi-key': '4fd095e525msh99b661699421a28p1b997ejsn4a6f974bbf31'\n};\nmsg.payload = {\n    \"text\": `ALERTA: Temperatura alta en Salida HCD. Temperatura actual: ${msg.payload.temperature}°C`\n};\nreturn msg;",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
@@ -11134,6 +11134,85 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "622f494dfe3d4fd6",
+        "type": "inject",
+        "z": "79b057876d37bdc0",
+        "name": "Iniciar solicitud",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 1300,
+        "y": 1300,
+        "wires": [
+            [
+                "aeda5e088efb4580"
+            ]
+        ]
+    },
+    {
+        "id": "aeda5e088efb4580",
+        "type": "function",
+        "z": "79b057876d37bdc0",
+        "name": "Configurar Solicitud",
+        "func": "msg.method = \"POST\";\nmsg.url = \"https://whin2.p.rapidapi.com/send\";\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'x-rapidapi-host': \"whin2.p.rapidapi.com\",\n    'x-rapidapi-key': '4fd095e525msh99b661699421a28p1b997ejsn4a6f974bbf31'\n};\nmsg.payload = {\"text\":\"hello whin, from rapidapi!\"};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1530,
+        "y": 1300,
+        "wires": [
+            [
+                "1b1edf4d762b7917"
+            ]
+        ]
+    },
+    {
+        "id": "1b1edf4d762b7917",
+        "type": "http request",
+        "z": "79b057876d37bdc0",
+        "name": "Enviar a Whin",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1740,
+        "y": 1300,
+        "wires": [
+            [
+                "120ca37a97eabe08"
+            ]
+        ]
+    },
+    {
+        "id": "120ca37a97eabe08",
+        "type": "debug",
+        "z": "79b057876d37bdc0",
+        "name": "Respuesta",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1940,
+        "y": 1300,
+        "wires": []
     },
     {
         "id": "1f30eb78f194d9ca",
