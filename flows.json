@@ -10642,7 +10642,7 @@
         "type": "function",
         "z": "79b057876d37bdc0",
         "name": "Preparar alerta Whin",
-        "func": "msg.method = \"POST\";\nmsg.url = \"https://whin2.p.rapidapi.com/send\";\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'x-rapidapi-host': \"whin2.p.rapidapi.com\",\n    'x-rapidapi-key': '4fd095e525msh99b661699421a28p1b997ejsn4a6f974bbf31'\n};\nmsg.payload = {\n    \"text\": `ALERTA: Temperatura alta en Salida HCD. Temperatura actual: ${msg.payload.temperature}°C`\n};\nreturn msg;",
+        "func": "msg.method = \"POST\";\nmsg.url = \"https://whin2.p.rapidapi.com/send2group \";\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'x-rapidapi-host': \"whin2.p.rapidapi.com\",\n    'x-rapidapi-key': '4fd095e525msh99b661699421a28p1b997ejsn4a6f974bbf31'\n};\nmsg.payload = {\n    \"text\": `ALERTA: Temperatura alta en Salida HCD. Temperatura actual: ${msg.payload.temperature}°C`\n};\nreturn msg;",
         "outputs": 1,
         "timeout": "",
         "noerr": 0,
